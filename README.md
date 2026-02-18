@@ -219,8 +219,6 @@ mvn -DskipTests compile
 
 1. **FHIR Server Indexing Delay**: New resources may have slight delay before appearing in searches (use dedicated local FHIR server for instant indexing)
 
-2. **Thymeleaf 3.1 SpEL Limitations**: Complex lambda expressions not supported; use conditional rendering instead
-
 ## Future Enhancements
 
 - [ ] User authentication and authorization
