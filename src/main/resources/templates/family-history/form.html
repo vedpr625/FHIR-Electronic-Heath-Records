@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Medical History - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script th:src="@{/js/snomed-codes.js}"></script>
+    <script th:src="@{/js/medical-autocomplete.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user"></i><span>Patient Chart</span></a></li>
+      <li><a th:href="@{/family-history/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-dna"></i><span>Medical History</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div style="padding:14px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Medical History')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'family-history')}"></div>
+    <div class="compact-form-container">
+      <div class="compact-form-header">
+        <div class="compact-header-left"><i class="fas fa-dna"></i>
+          <span th:text="${history.id != null && !history.id.isEmpty()} ? 'Edit Family History' : 'Add Family Medical History'"></span>
+        </div>
+        <a th:href="@{/family-history/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+      <form th:action="@{/family-history/save}" th:object="${history}" method="post" class="compact-form">
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{patientId}"/>
+        <input type="hidden" th:field="*{patientName}"/>
+        <div class="compact-section">
+          <div class="compact-section-title">Family Member Details</div>
+          <div class="compact-grid">
+            <div class="compact-field"><label class="compact-label required">Relationship</label>
+              <select th:field="*{relationship}" class="compact-select" required>
+                <option value="">Select Relationship</option>
+                <option value="Father">Father</option>
+                <option value="Mother">Mother</option>
+                <option value="Brother">Brother</option>
+                <option value="Sister">Sister</option>
+                <option value="Paternal Grandfather">Paternal Grandfather</option>
+                <option value="Paternal Grandmother">Paternal Grandmother</option>
+                <option value="Maternal Grandfather">Maternal Grandfather</option>
+                <option value="Maternal Grandmother">Maternal Grandmother</option>
+                <option value="Son">Son</option>
+                <option value="Daughter">Daughter</option>
+                <option value="Uncle">Uncle</option>
+                <option value="Aunt">Aunt</option>
+                <option value="First Cousin">First Cousin</option>
+                <option value="Half-Brother">Half-Brother</option>
+                <option value="Half-Sister">Half-Sister</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Sex</label>
+              <select th:field="*{sex}" class="compact-select">
+                <option value="">Unknown</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Date of Birth (approx)</label>
+              <input type="date" th:field="*{bornDate}" class="compact-input"/></div>
+            <div class="compact-field"><label class="compact-label">Deceased</label>
+              <select th:field="*{deceasedBoolean}" class="compact-select">
+                <option value="false">No / Unknown</option>
+                <option value="true">Yes</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Age at Death</label>
+              <input type="text" th:field="*{deceasedAge}" class="compact-input" placeholder="e.g., 72 years"/></div>
+            <div class="compact-field"><label class="compact-label">Status</label>
+              <select th:field="*{status}" class="compact-select">
+                <option value="completed">Completed</option>
+                <option value="partial">Partial</option>
+                <option value="health-unknown">Health Unknown</option>
+              </select></div>
+          </div>
+        </div>
+        <div class="compact-section">
+          <div class="compact-section-title">Condition / Disease</div>
+          <div class="compact-grid">
+            <div class="compact-field" style="grid-column:1/-1">
+                <label class="compact-label required">
+                    Condition Name
+                    <span style="font-size:11px;font-weight:500;color:var(--text-muted);margin-left:6px;">(Type to search ICD-10)</span>
+                </label>
+              <input type="text" 
+                     id="familyConditionDisplay"
+                     th:field="*{conditionDisplay}" 
+                     class="compact-input" 
+                     required 
+                     autocomplete="off"
+                     placeholder="e.g., Type 2 Diabetes, Hypertension, Breast Cancer"/>
+            </div>
+            <div class="compact-field"><label class="compact-label">ICD-10 Code</label>
+              <input type="text" 
+                     id="familyConditionCode"
+                     th:field="*{conditionCode}" 
+                     class="compact-input" 
+                     readonly
+                     style="background:#f8fafc;"
+                     placeholder="Auto-filled from search"/></div>
+            <div class="compact-field"><label class="compact-label">Age of Onset in Family Member</label>
+              <input type="text" th:field="*{conditionOnsetAge}" class="compact-input" placeholder="e.g., 50 years"/></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Condition Notes</label>
+              <textarea th:field="*{conditionNote}" class="compact-input compact-textarea" rows="2" placeholder="Additional details about this condition in the family member..."></textarea></div>
+          </div>
+        </div>
+        <div class="compact-section">
+          <div class="compact-section-title">Additional Notes</div>
+          <div class="compact-field">
+            <label class="compact-label">General Notes</label>
+            <textarea th:field="*{notes}" class="compact-input compact-textarea" rows="3" placeholder="Any additional information about family medical history..."></textarea>
+          </div>
+        </div>
+        <div class="compact-form-actions">
+          <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Family History</button>
+          <a th:href="@{/family-history/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+      </form>
+    </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Initialize ICD-10 autocomplete for family history condition
+document.addEventListener('DOMContentLoaded', function() {
+    medicalAutocomplete.initAutocomplete('familyConditionDisplay', {
+        type: 'icd10',
+        codeFieldId: 'familyConditionCode',
+        minChars: 2,
+        debounceMs: 300
+    });
+});
+</script>
+</body>
+</html>

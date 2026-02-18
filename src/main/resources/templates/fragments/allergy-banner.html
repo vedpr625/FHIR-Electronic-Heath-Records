@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+
+<!--
+  1C — ALLERGY SAFETY BANNER
+  Usage: <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+  Shows ONLY if patient has HIGH or MODERATE criticality allergies.
+  Completely hidden if no allergies or only low-severity allergies.
+-->
+<div th:fragment="banner(allergies)" id="allergyBannerWrapper" class="allergy-banner-wrapper">
+
+    <!-- Only show if HIGH criticality allergies exist -->
+    <div th:if="${allergies != null && !#lists.isEmpty(allergies)}"
+        th:with="hasHighAllergies=${!#lists.isEmpty(allergies.?[criticality == 'high'])}">
+         
+        <div th:if="${hasHighAllergies}"
+             class="allergy-safety-banner"
+             id="allergyBanner"
+             role="alert"
+             aria-live="assertive">
+            <div class="allergy-banner-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div style="flex:1;">
+                <div class="allergy-banner-title">
+                    Known Allergies — Verify before prescribing
+                </div>
+                <div class="allergy-banner-items">
+                    <span th:each="al : ${allergies}"
+                          th:if="${al.criticality == 'high'}"
+                          class="allergy-chip high">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong th:text="${al.display ?: 'Unknown allergen'}"></strong>
+                        <span th:if="${al.reactionManifestation != null}"
+                              style="font-weight:500;opacity:0.85;"
+                              th:text="'(' + al.reactionManifestation + ')'"></span>
+                    </span>
+                </div>
+            </div>
+            <button class="allergy-banner-dismiss"
+                    onclick="dismissAllergyBanner()"
+                    title="Dismiss — banner will reappear on next page"
+                    aria-label="Dismiss allergy banner">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    function dismissAllergyBanner() {
+        var banner = document.getElementById('allergyBanner');
+        if (banner) {
+            banner.style.transition = 'opacity 0.3s, max-height 0.4s';
+            banner.style.opacity = '0';
+            banner.style.maxHeight = '0';
+            banner.style.overflow = 'hidden';
+            banner.style.padding = '0';
+            banner.style.margin = '0';
+            banner.style.border = 'none';
+        }
+    }
+    </script>
+</div>
+
+</body>
+</html>

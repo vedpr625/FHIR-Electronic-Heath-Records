@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${patient.fullName + ' - MediCare ERP'}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item"><a th:href="@{/patients}" class="sub-nav-link">Overview</a></li>
+            <li class="sub-nav-item"><a th:href="@{/patients/new}" class="sub-nav-link">Registration</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patient Overview</span></a></li>
+                <li class="menu-item"><a th:href="@{/patients/new}" class="menu-link"><i class="fas fa-user-plus" style="color:#43a047"></i><span>New Patient</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-allergies" style="color:#e53935"></i><span>Allergies</span></a></li>
+                <li class="menu-item"><a th:href="@{/family-history/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-dna" style="color:#8e24aa"></i><span>Medical History</span></a></li>
+                <li class="menu-item"><a th:href="@{/encounters/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-hospital-user" style="color:#00897b"></i><span>Encounters</span></a></li>
+                <li class="menu-item"><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-notes-medical" style="color:#d97706"></i><span>Diagnoses</span></a></li>
+                <li class="menu-item"><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+                <li class="menu-item"><a th:href="@{/procedures/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-procedures" style="color:#1e88e5"></i><span>Procedures</span></a></li>
+                <li class="menu-item"><a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-flask" style="color:#fb8c00"></i><span>Investigations</span></a></li>
+                <li class="menu-item"><a th:href="@{/documents/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-file-medical" style="color:#00acc1"></i><span>Documents</span></a></li>
+                <li class="menu-item"><a th:href="@{/appointments/new(patientId=${patient.id})}" class="menu-link"><i class="fas fa-calendar-plus" style="color:#1e88e5"></i><span>Schedule Appt</span></a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="content-area">
+        <div class="medical-records-container">
+            <!-- Patient Header Bar -->
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Overview')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'overview')}"></div>
+
+            <!-- Split View -->
+            <div class="split-view-container">
+                <!-- Left Summary -->
+                <div class="summary-sidebar">
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-exclamation-triangle"></i> Allergies & Alerts</div>
+                        <div class="alert-item critical"><strong>No Allergies Recorded</strong><span>Review patient history</span></div>
+                    </div>
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-info-circle"></i> Patient Info</div>
+                        <div style="font-size:12px;line-height:1.8;color:#374151;">
+                            <div><strong>Email:</strong> <span th:text="${patient.email ?: '—'}"></span></div>
+                            <div><strong>Address:</strong> <span th:text="${(patient.addressLine ?: '') + ' ' + (patient.city ?: '')}"></span></div>
+                            <div><strong>Insurance:</strong> <span th:text="${patient.insuranceProvider ?: '—'}"></span></div>
+                            <div><strong>Emergency:</strong> <span th:text="${patient.emergencyName ?: '—'}"></span></div>
+                            <div th:if="${patient.emergencyPhone != null}"><strong>Emg. Phone:</strong> <span th:text="${patient.emergencyPhone}"></span></div>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+                        <div style="font-size:11px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:6px 8px;border-radius:4px;" th:text="'Patient/' + ${patient.id}"></div>
+                    </div>
+                </div>
+
+                <!-- Right Overview -->
+                <div class="content-main">
+                    <div class="content-header">
+                        <div class="content-title"><i class="fas fa-user"></i> Patient Overview</div>
+                        <div class="content-actions">
+                            <a th:href="@{/patients/edit/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div>
+                            <h4 style="font-size:12px;font-weight:700;color:#00897b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Personal Information</h4>
+                            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                                <tr><td style="padding:5px 0;color:#6b7280;width:120px;">Full Name</td><td style="font-weight:600;" th:text="${patient.fullName}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Date of Birth</td><td th:text="${patient.birthDate ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Gender</td><td th:text="${patient.gender ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Blood Group</td><td><span th:if="${patient.bloodGroup != null}" class="badge badge-teal" th:text="${patient.bloodGroup}"></span><span th:if="${patient.bloodGroup == null}">—</span></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">MRN</td><td><code th:text="${patient.mrn ?: '—'}"></code></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Status</td><td><span th:class="${patient.active ? 'badge badge-active' : 'badge badge-inactive'}" th:text="${patient.active ? 'Active' : 'Inactive'}"></span></td></tr>
+                            </table>
+                        </div>
+                        <div>
+                            <h4 style="font-size:12px;font-weight:700;color:#00897b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Contact & Address</h4>
+                            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                                <tr><td style="padding:5px 0;color:#6b7280;width:120px;">Phone</td><td th:text="${patient.phone ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Email</td><td th:text="${patient.email ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Address</td><td th:text="${patient.addressLine ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">City</td><td th:text="${patient.city ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Insurance</td><td th:text="${patient.insuranceProvider ?: '—'}"></td></tr>
+                                <tr><td style="padding:5px 0;color:#6b7280;">Emergency</td><td th:text="${patient.emergencyName ?: '—'}"></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="margin-top:20px;display:flex;gap:10px;">
+                        <a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="btn-primary"><i class="fas fa-stethoscope"></i> View Diagnoses</a>
+                        <a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-pills"></i> View Prescriptions</a>
+                        <a th:href="@{/appointments/new(patientId=${patient.id})}" class="btn-secondary"><i class="fas fa-calendar-plus"></i> Schedule Appointment</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

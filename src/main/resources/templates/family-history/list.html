@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title th:text="${patient.fullName + ' - Medical History - MediCare ERP'}"></title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">PATIENT</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>All Patients</span></a></li>
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+    </ul></div>
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-allergies" style="color:#e53935"></i><span>Allergies</span></a></li>
+      <li><a th:href="@{/family-history/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-dna" style="color:#8e24aa"></i><span>Medical History</span></a></li>
+      <li><a th:href="@{/procedures/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-procedures" style="color:#1e88e5"></i><span>Procedures</span></a></li>
+      <li><a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-flask" style="color:#fb8c00"></i><span>Investigations</span></a></li>
+      <li><a th:href="@{/documents/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-file-medical" style="color:#00acc1"></i><span>Documents</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div class="medical-records-container">
+      <div th:if="${success}" class="alert alert-success" style="margin:0"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+      <div th:if="${error}" class="alert alert-error" style="margin:0"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Medical History')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'family-history')}"></div>
+      <div class="split-view-container">
+        <div class="summary-sidebar">
+          <div class="summary-section">
+            <div class="summary-title"><i class="fas fa-dna"></i> Family Conditions</div>
+            <div th:each="h : ${histories}">
+              <div class="alert-item">
+                <strong th:text="${h.conditionDisplay ?: 'Unknown condition'}"></strong>
+                <span th:text="${h.relationship ?: '—'}"></span>
+              </div>
+            </div>
+            <div th:if="${#lists.isEmpty(histories)}" style="color:#9ca3af;font-size:15px;font-style:italic;">No family history recorded</div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+            <div style="font-size:14px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:8px 10px;border-radius:5px;">FamilyMemberHistory (R4)</div>
+          </div>
+        </div>
+        <div class="content-main">
+          <div class="content-header">
+            <div class="content-title"><i class="fas fa-dna"></i> Family Medical History</div>
+            <a th:href="@{/family-history/patient/{id}/new(id=${patient.id})}" class="btn-primary"><i class="fas fa-plus"></i> Add Entry</a>
+          </div>
+          <table class="emr-table">
+            <thead><tr><th>Family Member</th><th>Sex</th><th>Condition / Disease</th><th>ICD-10 Code</th><th>Onset Age</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr th:each="h : ${histories}">
+                <td style="font-weight:700;" th:text="${h.relationship ?: '—'}"></td>
+                <td th:text="${h.sex ?: '—'}"></td>
+                <td th:text="${h.conditionDisplay ?: '—'}"></td>
+                <td><span th:if="${h.conditionCode != null}" class="icd-code" th:text="${h.conditionCode}"></span><span th:if="${h.conditionCode == null}">—</span></td>
+                <td th:text="${h.conditionOnsetAge ?: '—'}"></td>
+                <td><span th:class="'badge status-' + (h.status ?: 'completed')" th:text="${h.status ?: 'completed'}"></span></td>
+                <td style="max-width:180px;color:#6b7280;font-size:14px;" th:text="${h.conditionNote ?: h.notes ?: '—'}"></td>
+                <td><div class="action-btns">
+                  <a th:href="@{/family-history/edit/{id}(id=${h.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                  <a th:href="@{/family-history/delete/{id}(id=${h.id},patientId=${patient.id})}" class="btn-danger" onclick="return confirm('Delete this history entry?')"><i class="fas fa-trash"></i></a>
+                </div></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(histories)}"><td colspan="8" class="td-empty"><i class="fas fa-dna" style="font-size:36px;display:block;margin-bottom:12px;color:#d1d5db;"></i>No family history recorded. <a th:href="@{/family-history/patient/{id}/new(id=${patient.id})}" style="color:#00897b;font-weight:700;">Add entry →</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

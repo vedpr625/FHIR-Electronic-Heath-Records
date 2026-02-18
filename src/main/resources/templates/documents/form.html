@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Document Reference - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+      <li><a th:href="@{/documents/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-file-medical" style="color:#00acc1"></i><span>Documents</span></a></li>
+      <li><a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-flask" style="color:#fb8c00"></i><span>Investigations</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div style="padding:14px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Documents')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'documents')}"></div>
+    <div class="compact-form-container">
+      <div class="compact-form-header">
+        <div class="compact-header-left"><i class="fas fa-file-medical"></i>
+          <span th:text="${document.id != null && !document.id.isEmpty()} ? 'Edit Document Reference' : 'Add Clinical Document'"></span>
+        </div>
+        <a th:href="@{/documents/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+      <form th:action="@{/documents/save}" th:object="${document}" method="post" class="compact-form">
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{patientId}"/>
+        <input type="hidden" th:field="*{patientName}"/>
+        <div class="compact-section">
+          <div class="compact-section-title">Document Information</div>
+          <div class="compact-grid">
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label required">Document Title</label>
+              <input type="text" th:field="*{title}" class="compact-input" required placeholder="e.g., Discharge Summary - 12-Feb-2026, MRI Brain Report, Pre-operative Assessment"/></div>
+            <div class="compact-field"><label class="compact-label required">Document Type</label>
+              <select th:field="*{type}" class="compact-select" required>
+                <option value="">Select Type</option>
+                <option value="Discharge Summary">Discharge Summary</option>
+                <option value="Clinical Note">Clinical Note</option>
+                <option value="Referral Letter">Referral Letter</option>
+                <option value="Lab Report">Lab Report</option>
+                <option value="Imaging Report">Imaging Report (Radiology)</option>
+                <option value="Operative Note">Operative Note</option>
+                <option value="Consent Form">Consent Form</option>
+                <option value="Prescription">Prescription Printout</option>
+                <option value="Insurance Document">Insurance Document</option>
+                <option value="Transfer Summary">Transfer Summary</option>
+                <option value="Pathology Report">Pathology Report</option>
+                <option value="Progress Note">Progress Note</option>
+                <option value="Nursing Note">Nursing Note</option>
+                <option value="Other">Other</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label required">Category</label>
+              <select th:field="*{category}" class="compact-select" required>
+                <option value="">Select Category</option>
+                <option value="Clinical Note">Clinical Note</option>
+                <option value="Imaging">Imaging</option>
+                <option value="Laboratory">Laboratory</option>
+                <option value="Administrative">Administrative</option>
+                <option value="Consent">Consent</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Status</label>
+              <select th:field="*{status}" class="compact-select">
+                <option value="current">Current</option>
+                <option value="superseded">Superseded</option>
+                <option value="entered-in-error">Entered in Error</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Document Status</label>
+              <select th:field="*{docStatus}" class="compact-select">
+                <option value="preliminary">Preliminary</option>
+                <option value="final">Final</option>
+                <option value="amended">Amended</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Author / Created By</label>
+              <select th:field="*{practitionerId}" class="compact-select">
+                <option value="">Select Author</option>
+                <option th:each="pr : ${practitioners}" th:value="${pr.id}" th:text="${'Dr. ' + pr.fullName}" th:selected="${pr.id == document.practitionerId}"></option>
+              </select></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Description</label>
+              <input type="text" th:field="*{description}" class="compact-input" placeholder="Brief description of what this document contains"/></div>
+          </div>
+        </div>
+        <div class="compact-section">
+          <div class="compact-section-title">Document Content</div>
+          <div class="compact-grid">
+            <div class="compact-field"><label class="compact-label required">Content Type</label>
+              <select th:field="*{contentType}" class="compact-select" required>
+                <option value="text/plain">Plain Text</option>
+                <option value="application/pdf">PDF Document</option>
+                <option value="image/jpeg">Image (JPEG)</option>
+                <option value="image/png">Image (PNG)</option>
+                <option value="application/xml">XML / HL7</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Document URL / Location</label>
+              <input type="url" th:field="*{url}" class="compact-input" placeholder="https://... or file path if stored externally"/></div>
+            <div class="compact-field"><label class="compact-label">Language</label>
+              <select th:field="*{language}" class="compact-select">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+                <option value="ta">Tamil</option>
+                <option value="te">Telugu</option>
+                <option value="mr">Marathi</option>
+              </select></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Embedded Text Content</label>
+              <textarea th:field="*{content}" class="compact-input compact-textarea" rows="6" placeholder="For plain text documents: paste the full document content here. For PDF/image: use URL field above and leave this blank."></textarea></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Notes</label>
+              <textarea th:field="*{notes}" class="compact-input compact-textarea" rows="2" placeholder="Any additional notes about this document..."></textarea></div>
+          </div>
+        </div>
+        <div class="compact-form-actions">
+          <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Document</button>
+          <a th:href="@{/documents/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</body></html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Encounter - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patient Overview</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL CHART</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+                <li><a th:href="@{/encounters/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-stethoscope" style="color:#00897b"></i><span>Encounters</span></a></li>
+                <li><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-notes-medical" style="color:#d97706"></i><span>Diagnoses</span></a></li>
+                <li><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="content-area">
+        <!-- Patient header on form page too -->
+        <div style="padding:14px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Encounters')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'encounters')}"></div>
+        <div class="compact-form-container">
+            <div class="compact-form-header">
+                <div class="compact-header-left">
+                    <i class="fas fa-stethoscope"></i>
+                    <span th:text="${encounter.id != null && !encounter.id.isEmpty()} ? 'Edit Encounter' : 'Start New Encounter'"></span>
+                </div>
+                <a th:href="@{/encounters/patient/{id}(id=${patient.id})}"
+                   class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+
+            <form th:action="@{/encounters/save}" th:object="${encounter}" method="post" class="compact-form">
+                <input type="hidden" th:field="*{id}"/>
+                <input type="hidden" th:field="*{patientId}"/>
+                <input type="hidden" th:field="*{patientName}"/>
+
+                <!-- Encounter Details -->
+                <div class="compact-section">
+                    <div class="compact-section-title">Encounter Details</div>
+                    <div class="compact-grid">
+                        <div class="compact-field">
+                            <label class="compact-label required">Encounter Type</label>
+                            <select th:field="*{type}" class="compact-select" required>
+                                <option value="">Select Type</option>
+                                <option value="Consultation">Consultation</option>
+                                <option value="Follow-up">Follow-up</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Routine Check-up">Routine Check-up</option>
+                                <option value="Pre-operative">Pre-operative</option>
+                                <option value="Post-operative">Post-operative</option>
+                                <option value="Telehealth">Telehealth</option>
+                                <option value="Home Visit">Home Visit</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label required">Class</label>
+                            <select th:field="*{classCode}" class="compact-select" required>
+                                <option value="AMB">Ambulatory (Outpatient)</option>
+                                <option value="IMP">Inpatient</option>
+                                <option value="EMER">Emergency</option>
+                                <option value="HH">Home Health</option>
+                                <option value="VR">Virtual (Telehealth)</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label required">Status</label>
+                            <select th:field="*{status}" class="compact-select" required>
+                                <option value="planned">Planned</option>
+                                <option value="arrived">Arrived</option>
+                                <option value="triaged">Triaged</option>
+                                <option value="in-progress" selected="selected">In Progress</option>
+                                <option value="onleave">On Leave</option>
+                                <option value="finished">Finished</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Attending Practitioner</label>
+                            <select th:field="*{practitionerId}" class="compact-select">
+                                <option value="">Select Practitioner</option>
+                                <option th:each="pr : ${practitioners}"
+                                        th:value="${pr.id}"
+                                        th:text="${'Dr. ' + pr.fullName}"
+                                        th:selected="${pr.id == encounter.practitionerId}"></option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Start Date &amp; Time</label>
+                            <input type="datetime-local" th:field="*{startDate}" class="compact-input"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">End Date &amp; Time</label>
+                            <input type="datetime-local" th:field="*{endDate}" class="compact-input"/>
+                        </div>
+                        <div class="compact-field" style="grid-column:1/-1">
+                            <label class="compact-label">Chief Complaint / Reason for Visit</label>
+                            <input type="text" th:field="*{reasonCode}" class="compact-input"
+                                   placeholder="e.g., Chest pain, Fever for 3 days, Routine follow-up"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Link to Clinical Data -->
+                <div class="compact-section">
+                    <div class="compact-section-title">Link Clinical Data</div>
+                    <div class="compact-grid">
+                        <div class="compact-field">
+                            <label class="compact-label">Link to Diagnosis (Condition)</label>
+                            <select th:field="*{conditionId}" class="compact-select">
+                                <option value="">No diagnosis linked yet</option>
+                                <option th:each="c : ${conditions}"
+                                        th:value="${c.id}"
+                                        th:text="${(c.code != null ? '[' + c.code + '] ' : '') + (c.display ?: 'Unknown')}"
+                                        th:selected="${c.id == encounter.conditionId}"></option>
+                            </select>
+                            <small style="font-size:14px;color:#6b7280;margin-top:4px;">
+                                Don't see the diagnosis? <a th:href="@{/conditions/patient/{id}/new(id=${patient.id})}" style="color:#00897b;font-weight:700;">Add it first &rarr;</a>
+                            </small>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Link Appointment</label>
+                            <input type="text" th:field="*{appointmentId}" class="compact-input"
+                                   placeholder="Appointment ID (optional)"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Organization / Facility</label>
+                            <select th:field="*{organizationId}" class="compact-select">
+                                <option value="">Select Organization</option>
+                                <option th:each="o : ${organizations}"
+                                        th:value="${o.id}"
+                                        th:text="${o.name}"
+                                        th:selected="${o.id == encounter.organizationId}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clinical Notes -->
+                <div class="compact-section">
+                    <div class="compact-section-title">Clinical Notes</div>
+                    <div class="compact-field">
+                        <label class="compact-label">Notes / Observations</label>
+                        <textarea th:field="*{notes}" class="compact-input compact-textarea" rows="4"
+                                  placeholder="Clinical observations, examination findings, treatment plan, follow-up instructions..."></textarea>
+                    </div>
+                </div>
+
+                <div class="compact-form-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Encounter</button>
+                    <a th:href="@{/encounters/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+
+                <!-- After save, prompt for next steps -->
+                <div style="margin-top:16px; padding:14px 18px; background:#e0f2f1; border-radius:8px; border:1.5px solid #00897b; font-size:15px; color:#00695c;">
+                    <strong><i class="fas fa-lightbulb"></i> After saving this encounter:</strong>
+                    <div style="margin-top:8px; display:flex; gap:12px; flex-wrap:wrap;">
+                        <a th:href="@{/conditions/patient/{id}/new(id=${patient.id})}" class="btn-condition"><i class="fas fa-notes-medical"></i> Add Diagnosis</a>
+                        <a th:href="@{/prescriptions/patient/{id}/new(id=${patient.id})}" class="btn-rx"><i class="fas fa-pills"></i> Write Prescription</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

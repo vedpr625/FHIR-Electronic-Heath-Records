@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Allergy - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script th:src="@{/js/snomed-codes.js}"></script>
+    <script th:src="@{/js/medical-autocomplete.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user"></i><span>Patient Chart</span></a></li>
+      <li><a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-allergies"></i><span>Allergies</span></a></li>
+      <li><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-notes-medical"></i><span>Diagnoses</span></a></li>
+      <li><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills"></i><span>Prescriptions</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div style="padding:14px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Allergies')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'allergies')}"></div>
+    <div class="compact-form-container">
+      <div class="compact-form-header">
+        <div class="compact-header-left"><i class="fas fa-allergies"></i>
+          <span th:text="${allergy.id != null && !allergy.id.isEmpty()} ? 'Edit Allergy / Intolerance' : 'Record Allergy / Intolerance'"></span>
+        </div>
+        <a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+      <form th:action="@{/allergies/save}" th:object="${allergy}" method="post" class="compact-form">
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{patientId}"/>
+        <input type="hidden" th:field="*{patientName}"/>
+        <div class="compact-section">
+          <div class="compact-section-title">Allergen Information</div>
+          <div class="compact-grid">
+            <div class="compact-field">
+                <label class="compact-label required">
+                    Allergen Name
+                    <span style="font-size:11px;font-weight:500;color:var(--text-muted);margin-left:6px;">(Type to search)</span>
+                </label>
+              <input type="text" 
+                     id="allergenDisplay"
+                     th:field="*{display}" 
+                     class="compact-input" 
+                     required 
+                     autocomplete="off"
+                     placeholder="e.g., Penicillin, Peanuts, Latex"/></div>
+            <div class="compact-field"><label class="compact-label">SNOMED Code</label>
+              <input type="text" 
+                     id="allergenCode"
+                     th:field="*{code}" 
+                     class="compact-input" 
+                     readonly
+                     style="background:#f8fafc;"
+                     placeholder="Auto-filled from search"/></div>
+            <div class="compact-field"><label class="compact-label required">Category</label>
+              <select th:field="*{category}" class="compact-select" required>
+                <option value="">Select Category</option>
+                <option value="medication">Medication</option>
+                <option value="food">Food</option>
+                <option value="environment">Environment</option>
+                <option value="biologic">Biologic</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Type</label>
+              <select th:field="*{type}" class="compact-select">
+                <option value="allergy">Allergy</option>
+                <option value="intolerance">Intolerance</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label required">Criticality</label>
+              <select th:field="*{criticality}" class="compact-select" required>
+                <option value="">Select Criticality</option>
+                <option value="high">High — Life-threatening risk</option>
+                <option value="low">Low — Minor risk</option>
+                <option value="unable-to-assess">Unable to Assess</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Clinical Status</label>
+              <select th:field="*{clinicalStatus}" class="compact-select">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="resolved">Resolved</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Verification Status</label>
+              <select th:field="*{verificationStatus}" class="compact-select">
+                <option value="confirmed">Confirmed</option>
+                <option value="unconfirmed">Unconfirmed</option>
+                <option value="refuted">Refuted</option>
+                <option value="entered-in-error">Entered in Error</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Onset Date</label>
+              <input type="date" th:field="*{onsetDate}" class="compact-input"/></div>
+          </div>
+        </div>
+        <div class="compact-section">
+          <div class="compact-section-title">Reaction Details</div>
+          <div class="compact-grid">
+            <div class="compact-field"><label class="compact-label">Manifestation</label>
+              <input type="text" th:field="*{reactionManifestation}" class="compact-input" placeholder="e.g., Anaphylaxis, Rash, Hives"/></div>
+            <div class="compact-field"><label class="compact-label">Severity</label>
+              <select th:field="*{reactionSeverity}" class="compact-select">
+                <option value="">Not Specified</option>
+                <option value="mild">Mild</option>
+                <option value="moderate">Moderate</option>
+                <option value="severe">Severe</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Exposure Route</label>
+              <input type="text" th:field="*{exposureRoute}" class="compact-input" placeholder="e.g., Oral, Intravenous"/></div>
+            <div class="compact-field"><label class="compact-label">Recorded By</label>
+              <select th:field="*{recorderId}" class="compact-select">
+                <option value="">Select Practitioner</option>
+                <option th:each="p : ${practitioners}" th:value="${p.id}" th:text="${p.fullName}"></option>
+              </select></div>
+          </div>
+          <div class="compact-field" style="margin-top:16px;">
+            <label class="compact-label">Additional Notes</label>
+            <textarea th:field="*{notes}" class="compact-textarea" rows="3" placeholder="Any additional clinical notes..."></textarea>
+          </div>
+        </div>
+        <div class="compact-form-actions">
+          <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Allergy</button>
+          <a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+      </form>
+    </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Initialize SNOMED CT allergen autocomplete
+document.addEventListener('DOMContentLoaded', function() {
+    medicalAutocomplete.initAutocomplete('allergenDisplay', {
+        type: 'snomed',
+        category: 'allergens',
+        codeFieldId: 'allergenCode',
+        minChars: 2,
+        debounceMs: 200
+    });
+});
+</script>
+</body>
+</html>

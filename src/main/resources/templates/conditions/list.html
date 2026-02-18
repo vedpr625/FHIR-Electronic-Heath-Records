@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${patient.fullName + ' - Diagnoses - MediCare ERP'}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item"><a th:href="@{/patients}" class="sub-nav-link">Overview</a></li>
+            <li class="sub-nav-item"><a th:href="@{/patients/new}" class="sub-nav-link">Registration</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patient Overview</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL RECORDS</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+                <li class="menu-item"><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-stethoscope" style="color:#00897b"></i><span>Diagnoses</span></a></li>
+                <li class="menu-item"><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="medical-records-container">
+            <div th:if="${success}" class="alert alert-success" style="margin:0;"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error" style="margin:0;"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+
+            <!-- Patient Bar -->
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Diagnoses')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'conditions')}"></div>
+
+            <!-- Split View -->
+            <div class="split-view-container">
+                <div class="summary-sidebar">
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-stethoscope"></i> Active Diagnoses</div>
+                        <div th:each="c : ${conditions}" th:if="${c.clinicalStatus == 'active' or c.clinicalStatus == null}">
+                            <div class="alert-item">
+                                <strong th:text="${c.display ?: 'Unknown'}"></strong>
+                                <span th:if="${c.code != null}" class="icd-code" th:text="${c.code}"></span>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(conditions)}" style="color:#9ca3af;font-size:12px;font-style:italic;">No active diagnoses</div>
+                    </div>
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+                        <div style="font-size:11px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:6px 8px;border-radius:4px;">Condition (HL7 FHIR R4)</div>
+                    </div>
+                </div>
+                <div class="content-main">
+                    <div class="content-header">
+                        <div class="content-title"><i class="fas fa-stethoscope"></i> Diagnoses / Conditions</div>
+                        <div class="content-actions">
+                            <a th:href="@{/conditions/patient/{id}/new(id=${patient.id})}" class="btn-primary"><i class="fas fa-plus"></i> Add Diagnosis</a>
+                        </div>
+                    </div>
+                    <table class="emr-table">
+                        <thead>
+                            <tr>
+                                <th>ICD Code</th>
+                                <th>Diagnosis</th>
+                                <th>Category</th>
+                                <th>Clinical Status</th>
+                                <th>Severity</th>
+                                <th>Onset</th>
+                                <th>Practitioner</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${conditions}">
+                                <td><span class="icd-code" th:text="${c.code ?: '—'}"></span></td>
+                                <td style="font-weight:600;" th:text="${c.display ?: '—'}"></td>
+                                <td th:text="${c.category ?: '—'}"></td>
+                                <td><span th:class="'badge status-' + (c.clinicalStatus ?: 'active')" th:text="${c.clinicalStatus ?: 'active'}"></span></td>
+                                <td><span th:class="'severity-' + (c.severity ?: 'moderate')" th:text="${c.severity ?: '—'}"></span></td>
+                                <td th:text="${c.onsetDate ?: '—'}"></td>
+                                <td th:text="${c.practitionerName ?: '—'}"></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <a th:href="@{/conditions/edit/{id}(id=${c.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                                        <a th:href="@{/conditions/delete/{id}(id=${c.id},patientId=${patient.id})}" class="btn-danger" onclick="return confirm('Remove this diagnosis?')"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(conditions)}">
+                                <td colspan="8" class="td-empty"><i class="fas fa-stethoscope" style="font-size:24px;display:block;margin-bottom:8px;color:#d1d5db;"></i>No diagnoses recorded for this patient.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

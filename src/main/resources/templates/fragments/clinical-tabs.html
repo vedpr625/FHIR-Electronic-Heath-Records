@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+
+<!--
+  CLINICAL TAB BAR — Simple horizontal navigation
+  Usage: <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'allergies')}"></div>
+-->
+<div th:fragment="tabs(patient, activeTab)" class="clinical-tabs">
+    <a th:href="@{/patients/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'overview'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-th-large"></i>
+        <span>Overview</span>
+    </a>
+    
+    <a th:href="@{/allergies/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'allergies'} ? 'tab-item active' : 'tab-item critical'">
+        <i class="fas fa-allergies"></i>
+        <span>Allergies</span>
+    </a>
+    
+    <a th:href="@{/family-history/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'family-history'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-dna"></i>
+        <span>History</span>
+    </a>
+    
+    <a th:href="@{/encounters/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'encounters'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-hospital-user"></i>
+        <span>Visits</span>
+    </a>
+    
+    <a th:href="@{/conditions/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'conditions'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-notes-medical"></i>
+        <span>Problems</span>
+    </a>
+    
+    <a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'prescriptions'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-pills"></i>
+        <span>Medications</span>
+    </a>
+    
+    <a th:href="@{/procedures/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'procedures'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-procedures"></i>
+        <span>Procedures</span>
+    </a>
+    
+    <a th:href="@{/investigations/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'investigations'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-flask"></i>
+        <span>Labs</span>
+    </a>
+    
+    <a th:href="@{/documents/patient/{id}(id=${patient.id})}"
+       th:class="${activeTab == 'documents'} ? 'tab-item active' : 'tab-item'">
+        <i class="fas fa-file-medical"></i>
+        <span>Documents</span>
+    </a>
+</div>
+
+</body>
+</html>

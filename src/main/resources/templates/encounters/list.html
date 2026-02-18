@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title th:text="${patient.fullName + ' - Encounters - MediCare ERP'}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item"><a th:href="@{/patients}" class="sub-nav-link">Patients</a></li>
+            <li class="sub-nav-item active"><a href="#" class="sub-nav-link">Encounters</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patient Overview</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL CHART</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+                <li><a th:href="@{/encounters/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-stethoscope" style="color:#00897b"></i><span>Encounters</span></a></li>
+                <li><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-notes-medical" style="color:#d97706"></i><span>Diagnoses</span></a></li>
+                <li><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+                <li><a th:href="@{/appointments/new(patientId=${patient.id})}" class="menu-link"><i class="fas fa-calendar-plus" style="color:#1e88e5"></i><span>Schedule Appt</span></a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="content-area">
+        <div class="medical-records-container">
+            <div th:if="${success}" class="alert alert-success" style="margin:0"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error" style="margin:0"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+
+            <!-- Patient Header -->
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Encounters')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'encounters')}"></div>
+
+            <!-- Split View -->
+            <div class="split-view-container">
+                <!-- Summary sidebar -->
+                <div class="summary-sidebar">
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-clock"></i> Recent Encounters</div>
+                        <div th:each="enc,stat : ${encounters}" th:if="${stat.index < 5}">
+                            <div class="alert-item" th:classappend="${enc.status == 'in-progress'} ? 'critical' : ''">
+                                <strong th:text="${enc.type ?: 'Encounter'}"></strong>
+                                <span th:text="${enc.startDate ?: '—'} + ' · ' + (enc.status ?: '')"></span>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(encounters)}" style="color:#9ca3af;font-size:15px;font-style:italic;">No encounters yet</div>
+                    </div>
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+                        <div style="font-size:14px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:8px 10px;border-radius:5px;">Encounter (HL7 FHIR R4)</div>
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <div class="content-main">
+                    <div class="content-header">
+                        <div class="content-title"><i class="fas fa-stethoscope"></i> Encounters / Visits</div>
+                        <div class="content-actions">
+                            <a th:href="@{/encounters/patient/{id}/new(id=${patient.id})}" class="btn-primary"><i class="fas fa-plus"></i> New Encounter</a>
+                        </div>
+                    </div>
+                    <table class="emr-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Class</th>
+                                <th>Chief Complaint</th>
+                                <th>Diagnosis</th>
+                                <th>Practitioner</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enc : ${encounters}">
+                                <td>
+                                    <span class="encounter-type">
+                                        <i class="fas fa-stethoscope"></i>
+                                        <span th:text="${enc.type ?: 'Consultation'}"></span>
+                                    </span>
+                                </td>
+                                <td th:text="${enc.classCode ?: '—'}"></td>
+                                <td th:text="${enc.reasonCode ?: '—'}"></td>
+                                <td>
+                                    <a th:if="${enc.conditionId != null}"
+                                       th:href="@{/conditions/patient/{pid}(pid=${patient.id})}"
+                                       style="color:#00897b;font-weight:700;font-size:15px;"
+                                       th:text="${enc.conditionDisplay ?: 'View →'}"></a>
+                                    <span th:if="${enc.conditionId == null}" style="color:#9ca3af;">—</span>
+                                </td>
+                                <td th:text="${enc.practitionerName ?: '—'}"></td>
+                                <td style="white-space:nowrap;" th:text="${enc.startDate ?: '—'}"></td>
+                                <td style="white-space:nowrap;" th:text="${enc.endDate ?: 'Ongoing'}"></td>
+                                <td><span th:class="'badge status-' + (enc.status ?: 'in-progress')" th:text="${enc.status ?: 'in-progress'}"></span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <!-- Quick links to clinical records from encounter row -->
+                                        <a th:href="@{/conditions/patient/{pid}(pid=${patient.id})}" class="btn-condition" title="View diagnoses"><i class="fas fa-notes-medical"></i></a>
+                                        <a th:href="@{/prescriptions/patient/{pid}(pid=${patient.id})}" class="btn-rx" title="View prescriptions"><i class="fas fa-pills"></i></a>
+                                        <a th:href="@{/encounters/edit/{id}(id=${enc.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                                        <a th:href="@{/encounters/delete/{id}(id=${enc.id},patientId=${patient.id})}" class="btn-danger" onclick="return confirm('Delete encounter?')"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(encounters)}">
+                                <td colspan="9" class="td-empty">
+                                    <i class="fas fa-stethoscope" style="font-size:36px;display:block;margin-bottom:12px;color:#d1d5db;"></i>
+                                    No encounters recorded. <a th:href="@{/encounters/patient/{id}/new(id=${patient.id})}" style="color:#00897b;font-weight:700;">Start one &rarr;</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

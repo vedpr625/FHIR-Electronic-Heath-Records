@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Prescription - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script th:src="@{/js/snomed-codes.js}"></script>
+    <script th:src="@{/js/medical-autocomplete.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users"></i><span>Patient Overview</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user"></i><span>Patient Chart</span></a></li>
+                <li class="menu-item"><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-stethoscope"></i><span>Diagnoses</span></a></li>
+                <li class="menu-item"><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-pills"></i><span>Prescriptions</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div style="padding:12px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Prescriptions')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'prescriptions')}"></div>
+        <div class="compact-form-container" style="margin-top:12px;">
+            <div class="compact-form-header">
+                <div class="compact-header-left"><i class="fas fa-prescription"></i><span th:text="${prescription.id != null && !prescription.id.isEmpty()} ? 'Edit Prescription' : 'New Prescription'"></span></div>
+                <a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+            <form th:action="@{/prescriptions/save}" th:object="${prescription}" method="post" class="compact-form">
+                <input type="hidden" th:field="*{id}"/>
+                <input type="hidden" th:field="*{patientId}"/>
+                <input type="hidden" th:field="*{patientName}"/>
+
+                <!-- Drug Information -->
+                <div class="compact-section">
+                    <div class="compact-section-title">Drug Information</div>
+                    <div class="compact-grid">
+                        <div class="compact-field" style="grid-column:1/-1;">
+                            <label class="compact-label required">
+                                Medication Name
+                                <span style="font-size:11px;font-weight:500;color:var(--text-muted);margin-left:6px;">(Type to search medications)</span>
+                            </label>
+                            <input type="text" 
+                                   id="medicationDisplay"
+                                   th:field="*{medicationDisplay}" 
+                                   class="compact-input" 
+                                   placeholder="e.g., Metformin, Lisinopril, Atorvastatin" 
+                                   autocomplete="off"
+                                   required/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Generic Name</label>
+                            <input type="text" 
+                                   id="genericName"
+                                   th:field="*{genericName}" 
+                                   class="compact-input" 
+                                   placeholder="e.g., Metformin HCl"
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">SNOMED Code</label>
+                            <input type="text" 
+                                   id="medicationCode"
+                                   th:field="*{medicationCode}" 
+                                   class="compact-input" 
+                                   readonly
+                                   style="background:#f8fafc;"
+                                   placeholder="Auto-filled"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Strength</label>
+                            <input type="text" th:field="*{strength}" class="compact-input" placeholder="e.g., 500mg"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Form</label>
+                            <select th:field="*{form}" class="compact-select">
+                                <option value="">Select Form</option>
+                                <option value="Tablet">Tablet</option>
+                                <option value="Capsule">Capsule</option>
+                                <option value="Solution">Solution</option>
+                                <option value="Suspension">Suspension</option>
+                                <option value="Injection">Injection</option>
+                                <option value="Cream">Cream</option>
+                                <option value="Ointment">Ointment</option>
+                                <option value="Inhaler">Inhaler</option>
+                                <option value="Patch">Patch</option>
+                                <option value="Drops">Drops</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dosage Instructions -->
+                <div class="compact-section">
+                    <div class="compact-section-title">Dosage Instructions</div>
+                    <div class="compact-grid">
+                        <div class="compact-field">
+                            <label class="compact-label required">Dosage</label>
+                            <input type="text" th:field="*{dosage}" class="compact-input" placeholder="e.g., 500 mg" required/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label required">Route</label>
+                            <select th:field="*{route}" class="compact-select" required>
+                                <option value="">Select Route</option>
+                                <option value="Oral">Oral</option>
+                                <option value="Intravenous">Intravenous (IV)</option>
+                                <option value="Intramuscular">Intramuscular (IM)</option>
+                                <option value="Subcutaneous">Subcutaneous</option>
+                                <option value="Topical">Topical</option>
+                                <option value="Rectal">Rectal</option>
+                                <option value="Inhalation">Inhalation</option>
+                                <option value="Ophthalmic">Ophthalmic</option>
+                                <option value="Otic">Otic</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label required">Frequency</label>
+                            <input type="text" 
+                                   id="frequency"
+                                   th:field="*{frequency}" 
+                                   class="compact-input" 
+                                   placeholder="e.g., Twice daily, Every 8 hours" 
+                                   required
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Duration</label>
+                            <input type="text" 
+                                   id="duration"
+                                   th:field="*{duration}" 
+                                   class="compact-input" 
+                                   placeholder="e.g., 30 days, 2 weeks"
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Quantity Dispensed</label>
+                            <input type="text" 
+                                   id="quantity"
+                                   th:field="*{quantity}" 
+                                   class="compact-input" 
+                                   placeholder="e.g., 60 tablets"
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Refills</label>
+                            <input type="number" th:field="*{refills}" class="compact-input" min="0" max="12" placeholder="0"/>
+                        </div>
+                        <div class="compact-field" style="grid-column:1/-1;">
+                            <label class="compact-label">Instructions</label>
+                            <textarea id="instructions"
+                                      th:field="*{instructions}" 
+                                      class="compact-textarea" 
+                                      rows="2" 
+                                      placeholder="e.g., Take with food, Take in the morning"
+                                      autocomplete="off"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescription Details -->
+                <div class="compact-section">
+                    <div class="compact-section-title">Prescription Details</div>
+                    <div class="compact-grid">
+                        <div class="compact-field">
+                            <label class="compact-label">Status</label>
+                            <select th:field="*{status}" class="compact-select">
+                                <option value="active">Active</option>
+                                <option value="on-hold">On Hold</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="completed">Completed</option>
+                                <option value="entered-in-error">Entered in Error</option>
+                                <option value="stopped">Stopped</option>
+                                <option value="draft">Draft</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Intent</label>
+                            <select th:field="*{intent}" class="compact-select">
+                                <option value="order">Order</option>
+                                <option value="plan">Plan</option>
+                                <option value="proposal">Proposal</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Priority</label>
+                            <select th:field="*{priority}" class="compact-select">
+                                <option value="routine">Routine</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="asap">ASAP</option>
+                                <option value="stat">STAT</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Authored On</label>
+                            <input type="date" th:field="*{authoredOn}" class="compact-input"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Prescriber</label>
+                            <select th:field="*{requesterId}" class="compact-select">
+                                <option value="">Select Practitioner</option>
+                                <option th:each="p : ${practitioners}" th:value="${p.id}" th:text="${p.fullName}"></option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Dispense Pharmacy</label>
+                            <input type="text" th:field="*{dispensePerformer}" class="compact-input" placeholder="Pharmacy name/ID"/>
+                        </div>
+                        <div class="compact-field" style="grid-column:1/-1;">
+                            <label class="compact-label">Reason for Prescription</label>
+                            <textarea th:field="*{reasonReference}" class="compact-textarea" rows="2" placeholder="Reason for this medication..."></textarea>
+                        </div>
+                        <div class="compact-field" style="grid-column:1/-1;">
+                            <label class="compact-label">Clinical Notes</label>
+                            <textarea th:field="*{notes}" class="compact-textarea" rows="3" placeholder="Additional clinical notes about this prescription..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compact-form-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Prescription</button>
+                    <a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Initialize SNOMED medication autocomplete
+document.addEventListener('DOMContentLoaded', function() {
+    // Generic names mapping - maps medication display names to their generic names
+    const medicationGenericNames = {
+        'Metformin': 'Metformin HCl',
+        'Aspirin': 'Acetylsalicylic Acid',
+        'Lisinopril': 'Lisinopril',
+        'Atorvastatin': 'Atorvastatin Calcium',
+        'Omeprazole': 'Omeprazole',
+        'Ibuprofen': 'Ibuprofen',
+        'Amoxicillin': 'Amoxicillin Trihydrate',
+        'Sertraline': 'Sertraline HCl',
+        'Levothyroxine': 'Levothyroxine Sodium',
+        'Hydrocodone': 'Hydrocodone/Acetaminophen',
+        'Clopidogrel': 'Clopidogrel Bisulfate',
+        'Warfarin': 'Warfarin Sodium'
+    };
+
+    // Initialize medication name autocomplete with callback to populate generic name
+    medicalAutocomplete.initAutocomplete('medicationDisplay', {
+        type: 'snomed',
+        category: 'medications',
+        codeFieldId: 'medicationCode',
+        minChars: 2,
+        debounceMs: 200,
+        onSelect: function(selected) {
+            // Auto-populate generic name based on medication selection
+            const genericNameField = document.getElementById('genericName');
+            if (genericNameField && selected.display) {
+                // Try to find exact match first
+                if (medicationGenericNames[selected.display]) {
+                    genericNameField.value = medicationGenericNames[selected.display];
+                } else {
+                    // Use the display name as a fallback
+                    genericNameField.value = selected.display;
+                }
+                console.log('Generic Name auto-populated:', genericNameField.value);
+            }
+        }
+    });
+
+    // Initialize generic name autocomplete as well (allows direct search of generic names)
+    medicalAutocomplete.initAutocomplete('genericName', {
+        type: 'snomed',
+        category: 'genericNames',
+        minChars: 2,
+        debounceMs: 200
+    });
+
+    // Initialize frequency autocomplete
+    medicalAutocomplete.initAutocomplete('frequency', {
+        type: 'snomed',
+        category: 'dosageFrequencies',
+        minChars: 1,
+        debounceMs: 200
+    });
+
+    // Initialize duration autocomplete
+    medicalAutocomplete.initAutocomplete('duration', {
+        type: 'snomed',
+        category: 'dosageDurations',
+        minChars: 1,
+        debounceMs: 200
+    });
+
+    // Initialize quantity autocomplete
+    medicalAutocomplete.initAutocomplete('quantity', {
+        type: 'snomed',
+        category: 'dispensedQuantities',
+        minChars: 1,
+        debounceMs: 200
+    });
+
+    // Initialize instructions autocomplete
+    medicalAutocomplete.initAutocomplete('instructions', {
+        type: 'snomed',
+        category: 'medicationInstructions',
+        minChars: 1,
+        debounceMs: 200
+    });
+
+    console.log('All prescription autocomplete initialized successfully');
+});
+</script>
+</body>
+</html>

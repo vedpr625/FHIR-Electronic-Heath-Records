@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Patients - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+
+<!-- Sub Nav -->
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item active"><a th:href="@{/patients}" class="sub-nav-link">Overview</a></li>
+            <li class="sub-nav-item"><a th:href="@{/patients/new}" class="sub-nav-link">Registration</a></li>
+            <li class="sub-nav-item"><a th:href="@{/appointments}" class="sub-nav-link">Appointments</a></li>
+        </ul>
+        <div class="sub-nav-search">
+            <form th:action="@{/patients}" method="get">
+                <input type="text" name="search" th:value="${search}" class="search-input" placeholder="Search patients..."/>
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link active"><i class="fas fa-users" style="color:#43a047"></i><span>Patient Overview</span></a></li>
+                <li class="menu-item"><a th:href="@{/patients/new}" class="menu-link"><i class="fas fa-user-plus" style="color:#43a047"></i><span>New Patient</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">APPOINTMENTS</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/appointments/new}" class="menu-link"><i class="fas fa-calendar-plus" style="color:#1e88e5"></i><span>Schedule</span></a></li>
+                <li class="menu-item"><a th:href="@{/appointments}" class="menu-link"><i class="fas fa-clock" style="color:#fb8c00"></i><span>All Appointments</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/prescriptions}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+                <li class="menu-item"><a th:href="@{/audit}" class="menu-link"><i class="fas fa-shield-alt" style="color:#fb8c00"></i><span>Audit Log</span></a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content-area">
+        <div class="flash-messages" style="padding-top:12px;">
+            <div th:if="${success}" class="alert alert-success"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+        </div>
+        <div class="page-top">
+            <div class="page-header-bar">
+                <h1><i class="fas fa-users"></i> Patient Overview</h1>
+                <a th:href="@{/patients/new}" class="btn-primary"><i class="fas fa-user-plus"></i> New Patient</a>
+            </div>
+        </div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Patient Name</th>
+                        <th>MRN</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Blood Group</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${patients}">
+                        <td>
+                            <div class="patient-row-photo" th:text="${#strings.toUpperCase(#strings.substring(p.firstName ?: 'P', 0, 1)) + #strings.toUpperCase(#strings.substring(p.lastName ?: 'T', 0, 1))}"></div>
+                        </td>
+                        <td><a th:href="@{/patients/{id}(id=${p.id})}" class="patient-name-link" th:text="${p.fullName}"></a></td>
+                        <td><code th:text="${p.mrn ?: '—'}"></code></td>
+                        <td th:text="${p.birthDate ?: '—'}"></td>
+                        <td th:text="${p.gender ?: '—'}"></td>
+                        <td th:text="${p.phone ?: '—'}"></td>
+                        <td><span th:if="${p.bloodGroup != null}" class="badge badge-teal" th:text="${p.bloodGroup}"></span><span th:if="${p.bloodGroup == null}">—</span></td>
+                        <td><span th:class="${p.active ? 'badge badge-active' : 'badge badge-inactive'}" th:text="${p.active ? 'Active' : 'Inactive'}"></span></td>
+                        <td>
+                            <div class="action-btns">
+                                <a th:href="@{/patients/{id}(id=${p.id})}" class="btn-edit"><i class="fas fa-eye"></i></a>
+                                <a th:href="@{/patients/edit/{id}(id=${p.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                                <a th:href="@{/patients/delete/{id}(id=${p.id})}" class="btn-danger" onclick="return confirm('Delete this patient?')"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(patients)}">
+                        <td colspan="9" class="td-empty"><i class="fas fa-users" style="font-size:24px;margin-bottom:8px;display:block;color:#d1d5db;"></i>No patients found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

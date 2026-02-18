@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Organizations - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('organizations')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section"><div class="section-title">ORGANIZATIONS</div>
+        <ul class="sidebar-menu">
+            <li class="menu-item"><a th:href="@{/organizations}" class="menu-link active"><i class="fas fa-hospital" style="color:#8e24aa"></i><span>All Organizations</span></a></li>
+            <li class="menu-item"><a th:href="@{/organizations/new}" class="menu-link"><i class="fas fa-plus" style="color:#8e24aa"></i><span>Add Organization</span></a></li>
+        </ul></div>
+    </aside>
+    <main class="content-area">
+        <div class="flash-messages" style="padding-top:12px;">
+            <div th:if="${success}" class="alert alert-success"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+        </div>
+        <div class="page-top"><div class="page-header-bar">
+            <h1><i class="fas fa-hospital"></i> Organizations</h1>
+            <a th:href="@{/organizations/new}" class="btn-primary"><i class="fas fa-plus"></i> Add Organization</a>
+        </div></div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead><tr><th>Name</th><th>Type</th><th>Phone</th><th>City</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="o : ${organizations}">
+                        <td style="font-weight:600;" th:text="${o.name}"></td>
+                        <td th:text="${o.type ?: '—'}"></td>
+                        <td th:text="${o.phone ?: '—'}"></td>
+                        <td th:text="${o.city ?: '—'}"></td>
+                        <td><span th:class="${o.active ? 'badge badge-active' : 'badge badge-inactive'}" th:text="${o.active ? 'Active' : 'Inactive'}"></span></td>
+                        <td><div class="action-btns"><a th:href="@{/organizations/edit/{id}(id=${o.id})}" class="btn-edit"><i class="fas fa-edit"></i></a><a th:href="@{/organizations/delete/{id}(id=${o.id})}" class="btn-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a></div></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(organizations)}"><td colspan="6" class="td-empty">No organizations found.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

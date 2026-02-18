@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${patient.fullName + ' - Prescriptions - MediCare ERP'}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item"><a th:href="@{/patients}" class="sub-nav-link">Overview</a></li>
+            <li class="sub-nav-item active"><a href="#" class="sub-nav-link">Prescriptions</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patient Overview</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL RECORDS</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+                <li class="menu-item"><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-stethoscope" style="color:#00897b"></i><span>Diagnoses</span></a></li>
+                <li class="menu-item"><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="medical-records-container">
+            <div th:if="${success}" class="alert alert-success" style="margin:0;"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error" style="margin:0;"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+
+            <!-- Patient Header Bar -->
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Prescriptions')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'prescriptions')}"></div>
+
+            <!-- Split View -->
+            <div class="split-view-container">
+                <!-- Summary Sidebar -->
+                <div class="summary-sidebar">
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-pills"></i> Active Medications</div>
+                        <div th:each="rx : ${prescriptions}" th:if="${rx.status == 'active' or rx.status == null}">
+                            <div class="med-item">
+                                <div class="med-name"><span class="rx-symbol">Rx</span><span th:text="${rx.medicationDisplay ?: '—'}"></span></div>
+                                <div class="med-dose" th:text="${(rx.doseQuantity ?: '') + ' ' + (rx.doseUnit ?: '') + ' · ' + (rx.frequency ?: '')}"></div>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(prescriptions)}" style="color:#9ca3af;font-size:12px;font-style:italic;">No active medications</div>
+                    </div>
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-exclamation-triangle"></i> Drug Allergies</div>
+                        <div class="alert-item critical"><strong>No Known Drug Allergies</strong><span>Verify with patient</span></div>
+                    </div>
+                    <div class="summary-section">
+                        <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+                        <div style="font-size:11px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:6px 8px;border-radius:4px;">MedicationRequest (FHIR R4)</div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="content-main">
+                    <div class="content-header">
+                        <div class="content-title"><i class="fas fa-pills"></i> Prescriptions</div>
+                        <div class="content-actions">
+                            <a th:href="@{/prescriptions/patient/{id}/new(id=${patient.id})}" class="btn-primary"><i class="fas fa-plus"></i> New Prescription</a>
+                        </div>
+                    </div>
+                    <table class="emr-table">
+                        <thead>
+                            <tr>
+                                <th>Drug</th>
+                                <th>Dose</th>
+                                <th>Route</th>
+                                <th>Frequency</th>
+                                <th>Qty</th>
+                                <th>Refills</th>
+                                <th>Prescriber</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rx : ${prescriptions}">
+                                <td>
+                                    <div class="drug-name"><span class="rx-symbol">Rx</span><span th:text="${rx.medicationDisplay ?: '—'}"></span></div>
+                                    <div class="drug-dose" th:if="${rx.genericName != null}" th:text="${rx.genericName}"></div>
+                                </td>
+                                <td th:text="${(rx.doseQuantity ?: '—') + (rx.doseUnit != null ? ' ' + rx.doseUnit : '')}"></td>
+                                <td th:text="${rx.route ?: '—'}"></td>
+                                <td th:text="${rx.frequency ?: '—'}"></td>
+                                <td th:text="${rx.quantity ?: '—'}"></td>
+                                <td th:text="${rx.refills ?: '0'}"></td>
+                                <td th:text="${rx.practitionerName ?: '—'}"></td>
+                                <td><span th:class="'badge status-' + (rx.status ?: 'active')" th:text="${rx.status ?: 'active'}"></span></td>
+                                <td th:text="${rx.authoredOn ?: '—'}"></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <a th:href="@{/prescriptions/edit/{id}(id=${rx.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                                        <a th:href="@{/prescriptions/delete/{id}(id=${rx.id},patientId=${patient.id})}" class="btn-danger" onclick="return confirm('Delete this prescription?')"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(prescriptions)}">
+                                <td colspan="10" class="td-empty"><i class="fas fa-pills" style="font-size:24px;display:block;margin-bottom:8px;color:#d1d5db;"></i>No prescriptions recorded for this patient.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

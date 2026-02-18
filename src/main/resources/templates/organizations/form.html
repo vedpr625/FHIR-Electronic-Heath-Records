@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Organization - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('organizations')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section"><div class="section-title">ORGANIZATIONS</div>
+        <ul class="sidebar-menu">
+            <li class="menu-item"><a th:href="@{/organizations}" class="menu-link"><i class="fas fa-hospital" style="color:#8e24aa"></i><span>All Organizations</span></a></li>
+            <li class="menu-item"><a th:href="@{/organizations/new}" class="menu-link active"><i class="fas fa-plus" style="color:#8e24aa"></i><span>Add Organization</span></a></li>
+        </ul></div>
+    </aside>
+    <main class="content-area">
+        <div class="compact-form-container">
+            <div class="compact-form-header">
+                <div class="compact-header-left"><i class="fas fa-hospital"></i><span th:text="${organization.id != null && !organization.id.isEmpty()} ? 'Edit Organization' : 'Add Organization'"></span></div>
+                <a th:href="@{/organizations}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+            <form th:action="@{/organizations/save}" th:object="${organization}" method="post" class="compact-form">
+                <input type="hidden" th:field="*{id}"/>
+                <div class="compact-section">
+                    <div class="compact-section-title">Organization Details</div>
+                    <div class="compact-grid">
+                        <div class="compact-field"><label class="compact-label required">Name</label><input type="text" th:field="*{name}" class="compact-input" required placeholder="e.g., City General Hospital"/></div>
+                        <div class="compact-field"><label class="compact-label">Type</label>
+                            <select th:field="*{type}" class="compact-select">
+                                <option value="">Select Type</option>
+                                <option value="Hospital">Hospital</option>
+                                <option value="Clinic">Clinic</option>
+                                <option value="Pharmacy">Pharmacy</option>
+                                <option value="Laboratory">Laboratory</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="compact-field"><label class="compact-label">Phone</label><input type="tel" th:field="*{phone}" class="compact-input" placeholder="+1 555-000-0000"/></div>
+                        <div class="compact-field"><label class="compact-label">Email</label><input type="email" th:field="*{email}" class="compact-input" placeholder="info@hospital.com"/></div>
+                        <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Street Address</label><input type="text" th:field="*{addressLine}" class="compact-input"/></div>
+                        <div class="compact-field"><label class="compact-label">City</label><input type="text" th:field="*{city}" class="compact-input"/></div>
+                        <div class="compact-field"><label class="compact-label">State</label><input type="text" th:field="*{state}" class="compact-input"/></div>
+                        <div class="compact-field"><label class="compact-label">Postal Code</label><input type="text" th:field="*{postalCode}" class="compact-input"/></div>
+                        <div class="compact-field"><label class="compact-label">Country</label><input type="text" th:field="*{country}" class="compact-input"/></div>
+                    </div>
+                </div>
+                <div class="compact-form-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-check"></i> Save Organization</button>
+                    <a th:href="@{/organizations}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

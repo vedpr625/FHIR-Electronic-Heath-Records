@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title th:text="${patient.fullName + ' - Allergies - MediCare ERP'}"></title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">PATIENT</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>All Patients</span></a></li>
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+    </ul></div>
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-allergies" style="color:#e53935"></i><span>Allergies</span></a></li>
+      <li><a th:href="@{/encounters/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-hospital-user" style="color:#00897b"></i><span>Encounters</span></a></li>
+      <li><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-notes-medical" style="color:#d97706"></i><span>Diagnoses</span></a></li>
+      <li><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div class="medical-records-container">
+      <div th:if="${success}" class="alert alert-success" style="margin:0"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+      <div th:if="${error}" class="alert alert-error" style="margin:0"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+      <!-- Patient Bar -->
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Allergies')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'allergies')}"></div>
+      <!-- Split View -->
+      <div class="split-view-container">
+        <div class="summary-sidebar">
+          <div class="summary-section">
+            <div class="summary-title"><i class="fas fa-exclamation-triangle"></i> Critical Allergies</div>
+            <div th:each="al : ${allergies}" th:if="${al.criticality == 'high'}">
+              <div class="alert-item critical">
+                <strong th:text="${al.display ?: 'Unknown allergen'}"></strong>
+                <span th:text="${al.reactionManifestation ?: al.category ?: ''}"></span>
+              </div>
+            </div>
+            <div th:if="${#lists.isEmpty(allergies)}" style="color:#9ca3af;font-size:15px;font-style:italic;">No allergies recorded — verify with patient</div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+            <div style="font-size:14px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:8px 10px;border-radius:5px;">AllergyIntolerance (R4)</div>
+          </div>
+        </div>
+        <div class="content-main">
+          <div class="content-header">
+            <div class="content-title"><i class="fas fa-allergies"></i> Allergies &amp; Intolerances</div>
+            <a th:href="@{/allergies/patient/{id}/new(id=${patient.id})}" class="btn-primary"><i class="fas fa-plus"></i> Add Allergy</a>
+          </div>
+          <table class="emr-table">
+            <thead><tr><th>Allergen</th><th>Category</th><th>Type</th><th>Criticality</th><th>Reaction</th><th>Severity</th><th>Status</th><th>Onset</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr th:each="al : ${allergies}">
+                <td style="font-weight:700;" th:text="${al.display ?: '—'}"></td>
+                <td>
+                  <span th:if="${al.category == 'medication'}" class="badge badge-info" th:text="${al.category ?: '—'}"></span>
+                  <span th:if="${al.category == 'food'}" class="badge badge-teal" th:text="${al.category ?: '—'}"></span>
+                  <span th:if="${al.category != 'medication' and al.category != 'food'}" class="badge badge-active" th:text="${al.category ?: '—'}"></span>
+                </td>
+                <td th:text="${al.type ?: '—'}"></td>
+                <td>
+                  <span th:if="${al.criticality == 'high'}" style="color:#dc2626;font-weight:800;"><i class="fas fa-exclamation-circle"></i> HIGH</span>
+                  <span th:if="${al.criticality == 'low'}" style="color:#d97706;font-weight:700;">LOW</span>
+                  <span th:if="${al.criticality == 'unable-to-assess'}" style="color:#6b7280;">Unknown</span>
+                  <span th:if="${al.criticality == null}">—</span>
+                </td>
+                <td th:text="${al.reactionManifestation ?: '—'}"></td>
+                <td><span th:class="'severity-' + (al.reactionSeverity ?: 'moderate')" th:text="${al.reactionSeverity ?: '—'}"></span></td>
+                <td><span th:class="'badge status-' + (al.clinicalStatus ?: 'active')" th:text="${al.clinicalStatus ?: 'active'}"></span></td>
+                <td th:text="${al.onsetDate ?: '—'}"></td>
+                <td><div class="action-btns">
+                  <a th:href="@{/allergies/edit/{id}(id=${al.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                  <a th:href="@{/allergies/delete/{id}(id=${al.id},patientId=${patient.id})}" class="btn-danger" onclick="return confirm('Delete this allergy record?')"><i class="fas fa-trash"></i></a>
+                </div></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(allergies)}"><td colspan="9" class="td-empty"><i class="fas fa-allergies" style="font-size:36px;display:block;margin-bottom:12px;color:#d1d5db;"></i>No allergies recorded. <a th:href="@{/allergies/patient/{id}/new(id=${patient.id})}" style="color:#00897b;font-weight:700;">Add one →</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

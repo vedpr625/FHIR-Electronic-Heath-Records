@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Investigation Order - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<script th:src="@{/js/snomed-codes.js}"></script>
+<script th:src="@{/js/medical-autocomplete.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+      <li><a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-flask" style="color:#fb8c00"></i><span>Investigations</span></a></li>
+      <li><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div style="padding:14px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Investigations')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'investigations')}"></div>
+    <div class="compact-form-container">
+      <div class="compact-form-header">
+        <div class="compact-header-left"><i class="fas fa-flask"></i>
+          <span th:text="${request.id != null && !request.id.isEmpty()} ? 'Edit Investigation Order' : 'Order Investigation'"></span>
+        </div>
+        <a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+      <form th:action="@{/investigations/save}" th:object="${request}" method="post" class="compact-form">
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{patientId}"/>
+        <input type="hidden" th:field="*{patientName}"/>
+        <div class="compact-section">
+          <div class="compact-section-title">Investigation Details</div>
+          <div class="compact-grid">
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label required">Test / Investigation Name</label>
+              <input type="text" 
+                     id="testName"
+                     th:field="*{display}" 
+                     class="compact-input" 
+                     required 
+                     placeholder="e.g., Complete Blood Count, HbA1c, Chest X-Ray, MRI Brain, Echocardiogram"
+                     autocomplete="off"/></div>
+            <div class="compact-field"><label class="compact-label">LOINC Code</label>
+              <input type="text" 
+                     id="testCode"
+                     th:field="*{code}" 
+                     class="compact-input" 
+                     readonly
+                     style="background:#f8fafc;"
+                     placeholder="Auto-filled"/></div>
+            <div class="compact-field"><label class="compact-label required">Category</label>
+              <select th:field="*{category}" class="compact-select" required>
+                <option value="">Select Category</option>
+                <option value="Laboratory">Laboratory</option>
+                <option value="Imaging">Imaging / Radiology</option>
+                <option value="Microbiology">Microbiology</option>
+                <option value="Pathology">Pathology / Histology</option>
+                <option value="Cardiology">Cardiology (ECG/Echo)</option>
+                <option value="Endoscopy">Endoscopy</option>
+                <option value="Pulmonology">Pulmonology (PFT)</option>
+                <option value="Neurophysiology">Neurophysiology (EEG/EMG)</option>
+                <option value="Other">Other</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label required">Priority</label>
+              <select th:field="*{priority}" class="compact-select" required>
+                <option value="routine">Routine</option>
+                <option value="urgent">Urgent</option>
+                <option value="asap">ASAP</option>
+                <option value="stat">STAT (Immediate)</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label required">Status</label>
+              <select th:field="*{status}" class="compact-select" required>
+                <option value="active" selected="selected">Active</option>
+                <option value="draft">Draft</option>
+                <option value="on-hold">On Hold</option>
+                <option value="completed">Completed</option>
+                <option value="revoked">Revoked</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Specimen Type</label>
+              <select th:field="*{specimen}" class="compact-select">
+                <option value="">Not Applicable</option>
+                <option value="Venous Blood">Venous Blood</option>
+                <option value="Arterial Blood">Arterial Blood</option>
+                <option value="Urine">Urine</option>
+                <option value="Stool">Stool</option>
+                <option value="Sputum">Sputum</option>
+                <option value="Swab">Swab / Culture</option>
+                <option value="Biopsy Tissue">Biopsy Tissue</option>
+                <option value="CSF">CSF</option>
+                <option value="Pleural Fluid">Pleural Fluid</option>
+                <option value="Ascitic Fluid">Ascitic Fluid</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Ordering Doctor</label>
+              <select th:field="*{practitionerId}" class="compact-select">
+                <option value="">Select Doctor</option>
+                <option th:each="pr : ${practitioners}" th:value="${pr.id}" th:text="${'Dr. ' + pr.fullName}" th:selected="${pr.id == request.practitionerId}"></option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Due / Scheduled Date</label>
+              <input type="date" th:field="*{occurrenceDate}" class="compact-input"/></div>
+            <div class="compact-field"><label class="compact-label">Link to Diagnosis</label>
+              <select th:field="*{conditionId}" class="compact-select">
+                <option value="">No diagnosis linked</option>
+                <option th:each="c : ${conditions}" th:value="${c.id}" th:text="${(c.code != null ? '[' + c.code + '] ' : '') + (c.display ?: '')}" th:selected="${c.id == request.conditionId}"></option>
+              </select></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Special Instructions / Order Detail</label>
+              <input type="text" 
+                     id="orderDetail"
+                     th:field="*{orderDetail}" 
+                     class="compact-input" 
+                     placeholder="e.g., Fasting sample required, With IV contrast, Include culture sensitivity, Timed sample 2h post-meal"
+                     autocomplete="off"/></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Reason / Clinical Indication</label>
+              <input type="text" th:field="*{reasonCode}" class="compact-input" placeholder="Why is this test being ordered?"/></div>
+          </div>
+        </div>
+        <div class="compact-section">
+          <div class="compact-section-title">Result Tracking</div>
+          <div class="compact-grid">
+            <div class="compact-field"><label class="compact-label">Result Status</label>
+              <select th:field="*{resultStatus}" class="compact-select">
+                <option value="pending">Pending</option>
+                <option value="received">Result Received</option>
+                <option value="reviewed">Reviewed by Doctor</option>
+              </select></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Result Notes / Findings</label>
+              <textarea th:field="*{resultNotes}" class="compact-input compact-textarea" rows="3" placeholder="Document key findings once result is received..."></textarea></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Additional Notes</label>
+              <textarea th:field="*{notes}" class="compact-input compact-textarea" rows="2" placeholder="Any other notes for the lab / radiology..."></textarea></div>
+          </div>
+        </div>
+        <div class="compact-form-actions">
+          <button type="submit" class="btn-submit"><i class="fas fa-flask"></i> Save Order</button>
+          <a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+// Initialize test/investigation autocomplete
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize test name autocomplete
+    medicalAutocomplete.initAutocomplete('testName', {
+        type: 'snomed',
+        category: 'tests',
+        codeFieldId: 'testCode',
+        minChars: 2,
+        debounceMs: 200
+    });
+
+    // Initialize special instructions autocomplete
+    medicalAutocomplete.initAutocomplete('orderDetail', {
+        type: 'snomed',
+        category: 'labInstructions',
+        minChars: 1,
+        debounceMs: 200
+    });
+
+    console.log('Investigation autocomplete initialized successfully');
+});
+</script>
+
+</body></html>

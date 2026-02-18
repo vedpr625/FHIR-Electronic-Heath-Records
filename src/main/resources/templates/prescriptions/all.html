@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Prescriptions - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('prescriptions')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PHARMACY</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/prescriptions}" class="menu-link active"><i class="fas fa-pills" style="color:#e53935"></i><span>All Prescriptions</span></a></li>
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Find Patient</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="page-top">
+            <div class="page-header-bar">
+                <h1><i class="fas fa-pills"></i> All Prescriptions</h1>
+                <span class="fhir-badge">FHIR MedicationRequest</span>
+            </div>
+        </div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead>
+                    <tr><th>Patient</th><th>Drug</th><th>Dose</th><th>Frequency</th><th>Prescriber</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="rx : ${prescriptions}">
+                        <td><a th:href="@{/prescriptions/patient/{id}(id=${rx.patientId})}" class="patient-name-link" th:text="${rx.patientName ?: rx.patientId}"></a></td>
+                        <td><div class="drug-name"><span class="rx-symbol">Rx</span><span th:text="${rx.medicationDisplay ?: '—'}"></span></div></td>
+                        <td th:text="${(rx.doseQuantity ?: '—') + (rx.doseUnit != null ? ' ' + rx.doseUnit : '')}"></td>
+                        <td th:text="${rx.frequency ?: '—'}"></td>
+                        <td th:text="${rx.practitionerName ?: '—'}"></td>
+                        <td><span th:class="'badge status-' + (rx.status ?: 'active')" th:text="${rx.status ?: 'active'}"></span></td>
+                        <td th:text="${rx.authoredOn ?: '—'}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(prescriptions)}"><td colspan="7" class="td-empty">No prescriptions found.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

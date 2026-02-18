@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Procedure - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<script th:src="@{/js/snomed-codes.js}"></script>
+<script th:src="@{/js/medical-autocomplete.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+      <li><a th:href="@{/procedures/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-procedures" style="color:#1e88e5"></i><span>Procedures</span></a></li>
+      <li><a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-flask" style="color:#fb8c00"></i><span>Investigations</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div style="padding:14px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Procedures')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'procedures')}"></div>
+    <div class="compact-form-container">
+      <div class="compact-form-header">
+        <div class="compact-header-left"><i class="fas fa-procedures"></i>
+          <span th:text="${procedure.id != null && !procedure.id.isEmpty()} ? 'Edit Procedure' : 'Record Procedure'"></span>
+        </div>
+        <a th:href="@{/procedures/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+      <form th:action="@{/procedures/save}" th:object="${procedure}" method="post" class="compact-form">
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{patientId}"/>
+        <input type="hidden" th:field="*{patientName}"/>
+        <div class="compact-section">
+          <div class="compact-section-title">Procedure Details</div>
+          <div class="compact-grid">
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label required">Procedure Name</label>
+              <input type="text" 
+                     id="procedureName"
+                     th:field="*{display}" 
+                     class="compact-input" 
+                     required 
+                     placeholder="e.g., Appendectomy, Knee Arthroscopy, Cataract Surgery, Coronary Angiography"
+                     autocomplete="off"/></div>
+            <div class="compact-field"><label class="compact-label">SNOMED Code</label>
+              <input type="text" 
+                     id="procedureCode"
+                     th:field="*{code}" 
+                     class="compact-input" 
+                     readonly
+                     style="background:#f8fafc;"
+                     placeholder="Auto-filled"/></div>
+            <div class="compact-field"><label class="compact-label required">Category</label>
+              <select th:field="*{category}" class="compact-select" required>
+                <option value="">Select Category</option>
+                <option value="Surgical">Surgical</option>
+                <option value="Diagnostic">Diagnostic</option>
+                <option value="Therapeutic">Therapeutic</option>
+                <option value="Counselling">Counselling</option>
+                <option value="Education">Education</option>
+                <option value="Minor Procedure">Minor Procedure</option>
+                <option value="Endoscopy">Endoscopy</option>
+                <option value="Radiology">Radiology (Interventional)</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label required">Status</label>
+              <select th:field="*{status}" class="compact-select" required>
+                <option value="preparation">Preparation</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed" selected="selected">Completed</option>
+                <option value="not-done">Not Done</option>
+                <option value="on-hold">On Hold</option>
+                <option value="stopped">Stopped</option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Performed Date</label>
+              <input type="date" th:field="*{performedDate}" class="compact-input"/></div>
+            <div class="compact-field"><label class="compact-label">Performed By</label>
+              <select th:field="*{practitionerId}" class="compact-select">
+                <option value="">Select Surgeon / Doctor</option>
+                <option th:each="pr : ${practitioners}" th:value="${pr.id}" th:text="${'Dr. ' + pr.fullName}" th:selected="${pr.id == procedure.practitionerId}"></option>
+              </select></div>
+            <div class="compact-field"><label class="compact-label">Location / Theatre</label>
+              <input type="text" th:field="*{location}" class="compact-input" placeholder="e.g., OT-1, OT-3, ICU, Endoscopy Suite"/></div>
+            <div class="compact-field"><label class="compact-label">Body Site</label>
+              <input type="text" 
+                     id="bodySite"
+                     th:field="*{bodySite}" 
+                     class="compact-input" 
+                     placeholder="e.g., Left knee, Appendix, Right eye"
+                     autocomplete="off"/></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Reason / Indication</label>
+              <input type="text" th:field="*{reasonCode}" class="compact-input" placeholder="Why was this procedure performed?"/></div>
+          </div>
+        </div>
+        <div class="compact-section">
+          <div class="compact-section-title">Outcome &amp; Follow-up</div>
+          <div class="compact-grid">
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Outcome</label>
+              <input type="text" th:field="*{outcome}" class="compact-input" placeholder="e.g., Successful, Partial success, Patient tolerated procedure well"/></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Complications</label>
+              <input type="text" th:field="*{complication}" class="compact-input" placeholder="e.g., Minimal bleeding, No complications"/></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Follow-up Instructions</label>
+              <input type="text" th:field="*{followUp}" class="compact-input" placeholder="e.g., Review in 2 weeks, Wound care daily, Physiotherapy"/></div>
+            <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Operative Notes</label>
+              <textarea th:field="*{notes}" class="compact-input compact-textarea" rows="4" placeholder="Detailed procedure notes, findings, technique used..."></textarea></div>
+          </div>
+        </div>
+        <div class="compact-form-actions">
+          <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Procedure</button>
+          <a th:href="@{/procedures/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+// Initialize procedure autocomplete
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize procedure name autocomplete
+    medicalAutocomplete.initAutocomplete('procedureName', {
+        type: 'snomed',
+        category: 'procedures',
+        codeFieldId: 'procedureCode',
+        minChars: 2,
+        debounceMs: 200
+    });
+
+    // Initialize body site autocomplete
+    medicalAutocomplete.initAutocomplete('bodySite', {
+        type: 'snomed',
+        category: 'bodySites',
+        minChars: 2,
+        debounceMs: 200
+    });
+
+    console.log('Procedure autocomplete initialized successfully');
+});
+</script>
+
+</body></html>

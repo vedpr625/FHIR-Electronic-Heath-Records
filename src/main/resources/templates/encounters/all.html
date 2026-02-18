@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>All Encounters - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('encounters')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">ENCOUNTERS</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/encounters}" class="menu-link active"><i class="fas fa-stethoscope" style="color:#00897b"></i><span>All Encounters</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/appointments}" class="menu-link"><i class="fas fa-calendar-check" style="color:#1e88e5"></i><span>Appointments</span></a></li>
+                <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patients</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="page-top">
+            <div class="page-header-bar">
+                <h1><i class="fas fa-stethoscope"></i> All Encounters</h1>
+                <span class="fhir-badge">FHIR Encounter Resource</span>
+            </div>
+        </div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Type</th>
+                        <th>Class</th>
+                        <th>Chief Complaint</th>
+                        <th>Practitioner</th>
+                        <th>Start</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="enc : ${encounters}">
+                        <td><a th:href="@{/encounters/patient/{pid}(pid=${enc.patientId})}" class="patient-name-link" th:text="${enc.patientName ?: enc.patientId ?: '—'}"></a></td>
+                        <td><span class="encounter-type"><i class="fas fa-stethoscope"></i><span th:text="${enc.type ?: 'Consultation'}"></span></span></td>
+                        <td th:text="${enc.classCode ?: '—'}"></td>
+                        <td th:text="${enc.reasonCode ?: '—'}"></td>
+                        <td th:text="${enc.practitionerName ?: '—'}"></td>
+                        <td style="white-space:nowrap;" th:text="${enc.startDate ?: '—'}"></td>
+                        <td><span th:class="'badge status-' + (enc.status ?: 'in-progress')" th:text="${enc.status ?: 'in-progress'}"></span></td>
+                        <td>
+                            <div class="action-btns">
+                                <a th:if="${enc.patientId != null}" th:href="@{/conditions/patient/{pid}(pid=${enc.patientId})}" class="btn-condition" title="Diagnoses"><i class="fas fa-notes-medical"></i></a>
+                                <a th:if="${enc.patientId != null}" th:href="@{/prescriptions/patient/{pid}(pid=${enc.patientId})}" class="btn-rx" title="Prescriptions"><i class="fas fa-pills"></i></a>
+                                <a th:href="@{/encounters/edit/{id}(id=${enc.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(encounters)}">
+                        <td colspan="8" class="td-empty">
+                            <i class="fas fa-stethoscope" style="font-size:36px;display:block;margin-bottom:12px;color:#d1d5db;"></i>
+                            No encounters yet. Start one from the <a th:href="@{/appointments}" style="color:#00897b;font-weight:700;">Appointments page &rarr;</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

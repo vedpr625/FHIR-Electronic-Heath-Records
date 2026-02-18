@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<nav class="top-nav" th:fragment="topnav(activePage)">
+    <div class="nav-container">
+        <div class="nav-logo">
+            <img th:src="@{/image/akhester-logo.png}" alt="Akhester Logo" height="150" width="150" style="object-fit: contain;">
+        </div>
+        <ul class="nav-menu">
+            <li><a th:href="@{/}" th:class="${activePage=='home'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-th-large" style="color:#00897b"></i><span>Dashboard</span></a></li>
+            <li><a th:href="@{/patients}" th:class="${activePage=='patients'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-users" style="color:#00acc1"></i><span>Patients</span></a></li>
+            <li><a th:href="@{/appointments}" th:class="${activePage=='appointments'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-calendar-check" style="color:#1e88e5"></i><span>Appointments</span></a></li>
+            <li><a th:href="@{/encounters}" th:class="${activePage=='encounters'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-hospital-user" style="color:#00897b"></i><span>Encounters</span></a></li>
+            <li><a th:href="@{/practitioners}" th:class="${activePage=='practitioners'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-user-md" style="color:#43a047"></i><span>Practitioners</span></a></li>
+            <li><a th:href="@{/organizations}" th:class="${activePage=='organizations'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-hospital" style="color:#8e24aa"></i><span>Organizations</span></a></li>
+            <li><a th:href="@{/audit}" th:class="${activePage=='audit'} ? 'nav-link active' : 'nav-link'"><i class="fas fa-shield-alt" style="color:#fb8c00"></i><span>Audit</span></a></li>
+        </ul>
+        <div class="nav-right">
+            <div class="user-profile">
+                <button class="profile-btn">
+                    <span class="user-avatar">AD</span>
+                    <span>Admin</span>
+                    <i class="fas fa-chevron-down" style="font-size:11px"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

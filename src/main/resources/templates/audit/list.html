@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Audit Log - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('audit')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section"><div class="section-title">SECURITY & AUDIT</div>
+        <ul class="sidebar-menu">
+            <li class="menu-item"><a th:href="@{/audit}" class="menu-link active"><i class="fas fa-shield-alt" style="color:#fb8c00"></i><span>Audit Log</span></a></li>
+        </ul></div>
+        <div class="sidebar-section">
+            <div class="summary-title" style="font-size:11px;font-weight:700;color:#00897b;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-code"></i> FHIR Resource</div>
+            <div style="font-size:11px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:6px 8px;border-radius:4px;margin-top:8px;">AuditEvent (HL7 FHIR R4)</div>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="page-top"><div class="page-header-bar">
+            <h1><i class="fas fa-shield-alt"></i> Audit Log</h1>
+            <span class="fhir-badge">FHIR AuditEvent Resource</span>
+        </div></div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead><tr><th>Event ID</th><th>Action</th><th>Resource</th><th>Description</th><th>Agent</th><th>Outcome</th><th>Recorded</th></tr></thead>
+                <tbody>
+                    <tr th:each="e : ${events}">
+                        <td><code style="font-size:11px;color:#00695c;" th:text="${e.id}"></code></td>
+                        <td><span th:class="'badge badge-action-' + (e.action ?: 'R')" th:text="${e.action ?: '—'}"></span></td>
+                        <td><code style="font-size:12px;" th:text="${e.resource ?: '—'}"></code></td>
+                        <td th:text="${e.description ?: '—'}"></td>
+                        <td th:text="${e.agent ?: '—'}"></td>
+                        <td th:text="${e.outcome ?: '—'}"></td>
+                        <td style="font-size:12px;color:#6b7280;" th:text="${e.recorded ?: '—'}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(events)}"><td colspan="7" class="td-empty"><i class="fas fa-shield-alt" style="font-size:24px;display:block;margin-bottom:8px;color:#d1d5db;"></i>No audit events found.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

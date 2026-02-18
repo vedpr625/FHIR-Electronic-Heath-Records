@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Add Diagnosis - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script th:src="@{/js/snomed-codes.js}"></script>
+    <script th:src="@{/js/medical-autocomplete.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PATIENT MANAGEMENT</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users"></i><span>Patient Overview</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user"></i><span>Patient Chart</span></a></li>
+                <li class="menu-item"><a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-stethoscope"></i><span>Diagnoses</span></a></li>
+                <li class="menu-item"><a th:href="@{/prescriptions/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-pills"></i><span>Prescriptions</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div style="padding:12px 20px 0;">
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Diagnoses')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'conditions')}"></div>
+        <div class="compact-form-container" style="margin-top:12px;">
+            <div class="compact-form-header">
+                <div class="compact-header-left"><i class="fas fa-stethoscope"></i><span th:text="${condition.id != null && !condition.id.isEmpty()} ? 'Edit Diagnosis' : 'Add Diagnosis / Condition'"></span></div>
+                <a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+            <form th:action="@{/conditions/save}" th:object="${condition}" method="post" class="compact-form">
+                <input type="hidden" th:field="*{id}"/>
+                <input type="hidden" th:field="*{patientId}"/>
+                <input type="hidden" th:field="*{patientName}"/>
+
+                <div class="compact-section">
+                    <div class="compact-section-title">Diagnosis Information</div>
+                    <div class="compact-grid">
+                        <div class="compact-field">
+                            <label class="compact-label required">
+                                Diagnosis Name
+                                <span style="font-size:11px;font-weight:500;color:var(--text-muted);margin-left:6px;">(Type to search ICD-10)</span>
+                            </label>
+                            <input type="text" 
+                                   id="diagnosisDisplay" 
+                                   th:field="*{display}" 
+                                   class="compact-input" 
+                                   placeholder="e.g., Type 2 Diabetes, Hypertension" 
+                                   autocomplete="off"
+                                   required/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">ICD-10 Code</label>
+                            <input type="text" 
+                                   id="diagnosisCode"
+                                   th:field="*{code}" 
+                                   class="compact-input" 
+                                   placeholder="Auto-filled from search"
+                                   readonly
+                                   style="background:#f8fafc;"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Category</label>
+                            <select th:field="*{category}" class="compact-select">
+                                <option value="">Select Category</option>
+                                <option value="encounter-diagnosis">Encounter Diagnosis</option>
+                                <option value="problem-list-item">Problem List Item</option>
+                                <option value="health-concern">Health Concern</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Clinical Status</label>
+                            <select th:field="*{clinicalStatus}" class="compact-select">
+                                <option value="active">Active</option>
+                                <option value="recurrence">Recurrence</option>
+                                <option value="relapse">Relapse</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="remission">Remission</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Verification Status</label>
+                            <select th:field="*{verificationStatus}" class="compact-select">
+                                <option value="confirmed">Confirmed</option>
+                                <option value="provisional">Provisional</option>
+                                <option value="differential">Differential</option>
+                                <option value="refuted">Refuted</option>
+                                <option value="entered-in-error">Entered in Error</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Severity</label>
+                            <select th:field="*{severity}" class="compact-select">
+                                <option value="">Not Specified</option>
+                                <option value="mild">Mild</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="severe">Severe</option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Onset Date</label>
+                            <input type="date" th:field="*{onsetDate}" class="compact-input"/>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label">Abatement Date</label>
+                            <input type="date" th:field="*{abatementDate}" class="compact-input"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compact-section">
+                    <div class="compact-section-title">Additional Information</div>
+                    <div class="compact-field">
+                        <label class="compact-label">Clinical Notes</label>
+                        <textarea th:field="*{notes}" class="compact-textarea" rows="4" placeholder="Additional clinical notes about this diagnosis..."></textarea>
+                    </div>
+                </div>
+
+                <div class="compact-form-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Save Diagnosis</button>
+                    <a th:href="@{/conditions/patient/{id}(id=${patient.id})}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+        </div>
+    </main>
+</div>
+
+<script>
+// Initialize ICD-10 autocomplete on diagnosis name field
+document.addEventListener('DOMContentLoaded', function() {
+    medicalAutocomplete.initAutocomplete('diagnosisDisplay', {
+        type: 'icd10',
+        codeFieldId: 'diagnosisCode',
+        minChars: 2,
+        debounceMs: 300,
+        onSelect: function(selected) {
+            console.log('Selected:', selected);
+            // Code field is auto-filled by the autocomplete system
+        }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title th:text="${patient.fullName + ' - Documents - MediCare ERP'}"></title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('patients')}"></div>
+<div class="main-container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><div class="section-title">PATIENT</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>All Patients</span></a></li>
+      <li><a th:href="@{/patients/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-user" style="color:#00897b"></i><span>Patient Chart</span></a></li>
+    </ul></div>
+    <div class="sidebar-section"><div class="section-title">CLINICAL</div>
+    <ul class="sidebar-menu">
+      <li><a th:href="@{/allergies/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-allergies" style="color:#e53935"></i><span>Allergies</span></a></li>
+      <li><a th:href="@{/family-history/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-dna" style="color:#8e24aa"></i><span>Medical History</span></a></li>
+      <li><a th:href="@{/procedures/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-procedures" style="color:#1e88e5"></i><span>Procedures</span></a></li>
+      <li><a th:href="@{/investigations/patient/{id}(id=${patient.id})}" class="menu-link"><i class="fas fa-flask" style="color:#fb8c00"></i><span>Investigations</span></a></li>
+      <li><a th:href="@{/documents/patient/{id}(id=${patient.id})}" class="menu-link active"><i class="fas fa-file-medical" style="color:#00acc1"></i><span>Documents</span></a></li>
+    </ul></div>
+  </aside>
+  <main class="content-area">
+    <div class="medical-records-container">
+      <div th:if="${success}" class="alert alert-success" style="margin:0"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+      <div th:if="${error}" class="alert alert-error" style="margin:0"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+      <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Documents')}"></div>
+      <div th:replace="~{fragments/allergy-banner :: banner(${allergies})}"></div>
+
+            <div th:replace="~{fragments/clinical-tabs :: tabs(${patient}, 'documents')}"></div>
+      <div class="split-view-container">
+        <div class="summary-sidebar">
+          <div class="summary-section">
+            <div class="summary-title"><i class="fas fa-file-medical"></i> Recent Documents</div>
+            <div th:each="doc,stat : ${documents}" th:if="${stat.index < 6}">
+              <div class="alert-item">
+                <strong th:text="${doc.title ?: doc.type ?: 'Document'}"></strong>
+                <span th:text="${doc.type ?: ''} + ' · ' + (doc.date ?: '')"></span>
+              </div>
+            </div>
+            <div th:if="${#lists.isEmpty(documents)}" style="color:#9ca3af;font-size:15px;font-style:italic;">No documents uploaded</div>
+          </div>
+          <div class="summary-section">
+            <div class="summary-title"><i class="fas fa-code"></i> FHIR Resource</div>
+            <div style="font-size:14px;font-family:monospace;color:#00695c;background:#e0f2f1;padding:8px 10px;border-radius:5px;">DocumentReference (R4)</div>
+          </div>
+        </div>
+        <div class="content-main">
+          <div class="content-header">
+            <div class="content-title"><i class="fas fa-file-medical"></i> Clinical Documents</div>
+            <a th:href="@{/documents/patient/{id}/new(id=${patient.id})}" class="btn-primary"><i class="fas fa-plus"></i> Add Document</a>
+          </div>
+          <table class="emr-table">
+            <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th><th>Doc Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr th:each="doc : ${documents}">
+                <td>
+                  <div style="font-weight:700;">
+                    <i th:if="${doc.contentType == 'application/pdf'}" class="fas fa-file-pdf" style="color:#e53935;margin-right:6px;"></i>
+                    <i th:if="${doc.contentType == 'image/jpeg' || doc.contentType == 'image/png'}" class="fas fa-file-image" style="color:#1e88e5;margin-right:6px;"></i>
+                    <i th:if="${doc.contentType == 'text/plain' || doc.contentType == null}" class="fas fa-file-alt" style="color:#00897b;margin-right:6px;"></i>
+                    <span th:text="${doc.title ?: '(No title)'}"></span>
+                  </div>
+                  <div th:if="${doc.description != null}" style="font-size:13px;color:#6b7280;" th:text="${doc.description}"></div>
+                  <div th:if="${doc.url != null}" style="margin-top:4px;">
+                    <a th:href="${doc.url}" target="_blank" style="font-size:14px;color:#00897b;font-weight:600;"><i class="fas fa-external-link-alt"></i> View Document</a>
+                  </div>
+                </td>
+                <td><span class="badge badge-teal" th:text="${doc.type ?: '—'}"></span></td>
+                <td th:text="${doc.category ?: '—'}"></td>
+                <td th:text="${doc.practitionerName ?: '—'}"></td>
+                <td style="white-space:nowrap;" th:text="${doc.date ?: '—'}"></td>
+                <td><span th:class="'badge status-' + (doc.status ?: 'current')" th:text="${doc.status ?: 'current'}"></span></td>
+                <td><span th:class="'badge ' + (doc.docStatus == 'final' ? 'badge-active' : 'badge-info')" th:text="${doc.docStatus ?: 'final'}"></span></td>
+                <td><div class="action-btns">
+                  <a th:href="@{/documents/edit/{id}(id=${doc.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                  <a th:href="@{/documents/delete/{id}(id=${doc.id},patientId=${patient.id})}" class="btn-danger" onclick="return confirm('Delete this document reference?')"><i class="fas fa-trash"></i></a>
+                </div></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(documents)}"><td colspan="8" class="td-empty"><i class="fas fa-file-medical" style="font-size:36px;display:block;margin-bottom:12px;color:#d1d5db;"></i>No documents uploaded. <a th:href="@{/documents/patient/{id}/new(id=${patient.id})}" style="color:#00897b;font-weight:700;">Add one →</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

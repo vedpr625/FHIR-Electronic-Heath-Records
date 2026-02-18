@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><title>Practitioner Registration - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('practitioners')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item"><a th:href="@{/practitioners}" class="sub-nav-link">Overview</a></li>
+            <li class="sub-nav-item active"><a href="#" class="sub-nav-link">Registration</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PRACTITIONERS</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/practitioners}" class="menu-link"><i class="fas fa-user-md" style="color:#1e88e5"></i><span>All Practitioners</span></a></li>
+                <li class="menu-item"><a th:href="@{/practitioners/new}" class="menu-link active"><i class="fas fa-user-plus" style="color:#1e88e5"></i><span>Add Practitioner</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="compact-form-container">
+            <div class="compact-form-header">
+                <div class="compact-header-left"><i class="fas fa-user-md"></i><span th:text="${practitioner.id != null && !practitioner.id.isEmpty()} ? 'Edit Practitioner' : 'New Practitioner Registration'"></span></div>
+                <a th:href="@{/practitioners}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+            <form th:action="@{/practitioners/save}" th:object="${practitioner}" method="post" class="compact-form">
+                <input type="hidden" th:field="*{id}"/>
+                <div class="compact-section">
+                    <div class="compact-section-title">Personal Information</div>
+                    <div class="compact-grid">
+                        <div class="compact-field"><label class="compact-label required">First Name</label><input type="text" th:field="*{firstName}" class="compact-input" required placeholder="e.g., James"/></div>
+                        <div class="compact-field"><label class="compact-label required">Last Name</label><input type="text" th:field="*{lastName}" class="compact-input" required placeholder="e.g., Wilson"/></div>
+                        <div class="compact-field"><label class="compact-label">Specialization</label><input type="text" th:field="*{specialization}" class="compact-input" placeholder="e.g., Cardiologist"/></div>
+                        <div class="compact-field"><label class="compact-label">Department</label><input type="text" th:field="*{department}" class="compact-input" placeholder="e.g., Internal Medicine"/></div>
+                        <div class="compact-field"><label class="compact-label">License Number</label><input type="text" th:field="*{licenseNumber}" class="compact-input" placeholder="e.g., LIC-12345"/></div>
+                    </div>
+                </div>
+                <div class="compact-section">
+                    <div class="compact-section-title">Contact Information</div>
+                    <div class="compact-grid">
+                        <div class="compact-field"><label class="compact-label required">Phone</label><input type="tel" th:field="*{phone}" class="compact-input" required placeholder="+1 555-000-0000"/></div>
+                        <div class="compact-field"><label class="compact-label">Email</label><input type="email" th:field="*{email}" class="compact-input" placeholder="doctor@hospital.com"/></div>
+                    </div>
+                </div>
+                <div class="compact-form-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-check"></i> Submit Registration</button>
+                    <a th:href="@{/practitioners}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

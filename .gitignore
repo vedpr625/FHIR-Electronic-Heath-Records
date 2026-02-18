@@ -1,0 +1,136 @@
+# Maven build
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iml
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+.metadata
+bin/
+tmp/
+*.tmp_*
+
+# IDE - VSCode
+.vscode/
+*.code-workspace
+
+# IDE - NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.gitkeep
+
+# Build artifacts
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Gradle
+.gradle
+build/
+gradle/
+
+# Maven wrapper
+.mvn/
+
+# Spring Boot
+*.jar
+*.war
+
+# Package Files
+*.zip
+*.tar
+*.tar.gz
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Application properties
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# Generated files
+.factorypath
+*.class
+*.ctxt
+.classpath
+.project
+.c9/
+*.sage.py
+
+# Local development
+local/
+tmp/
+temp/
+
+# Node modules (if using npm/yarn)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Documentation generated files
+docs/generated/
+javadoc/
+
+# Temporary files
+*.swp
+*.swo
+*~
+.~*
+
+# Test coverage
+coverage/
+.coverage
+jacoco.exec
+
+# Cache
+.cache
+*.cache

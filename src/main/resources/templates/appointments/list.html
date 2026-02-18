@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Appointments - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('appointments')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item active"><a th:href="@{/appointments}" class="sub-nav-link">All Appointments</a></li>
+            <li class="sub-nav-item"><a th:href="@{/appointments/new}" class="sub-nav-link">Schedule New</a></li>
+            <li class="sub-nav-item"><a th:href="@{/encounters}" class="sub-nav-link">All Encounters</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">APPOINTMENTS</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/appointments}" class="menu-link active"><i class="fas fa-calendar-check" style="color:#1e88e5"></i><span>All Appointments</span></a></li>
+                <li><a th:href="@{/appointments/new}" class="menu-link"><i class="fas fa-calendar-plus" style="color:#1e88e5"></i><span>Schedule New</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">ENCOUNTERS</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/encounters}" class="menu-link"><i class="fas fa-stethoscope" style="color:#00897b"></i><span>All Encounters</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">CLINICAL</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/patients}" class="menu-link"><i class="fas fa-users" style="color:#43a047"></i><span>Patients</span></a></li>
+                <li><a th:href="@{/prescriptions}" class="menu-link"><i class="fas fa-pills" style="color:#e53935"></i><span>Prescriptions</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="flash-messages" style="padding-top:14px;">
+            <div th:if="${success}" class="alert alert-success"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+        </div>
+        <div style="margin:14px 20px 0; background:#e0f7fa; border:2px solid #00acc1; border-radius:8px; padding:13px 18px; display:flex; align-items:center; gap:12px; font-size:15px; color:#006064;">
+            <i class="fas fa-info-circle" style="font-size:22px; flex-shrink:0;"></i>
+            <span><strong>Clinical flow:</strong> Book appointment &rarr; click <strong>Start Encounter</strong> to open the visit &rarr; then add <strong>Diagnoses</strong> &amp; <strong>Prescriptions</strong> from the patient chart.</span>
+        </div>
+        <div class="page-top">
+            <div class="page-header-bar">
+                <h1><i class="fas fa-calendar-check"></i> Appointments</h1>
+                <a th:href="@{/appointments/new}" class="btn-primary"><i class="fas fa-calendar-plus"></i> Schedule Appointment</a>
+            </div>
+        </div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Practitioner</th>
+                        <th>Date &amp; Time</th>
+                        <th>Duration</th>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th style="min-width:360px;">Clinical Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${appointments}">
+                        <td><a th:href="@{/patients/{id}(id=${a.patientId})}" class="patient-name-link" th:text="${a.patientName ?: '—'}"></a></td>
+                        <td th:text="${a.practitionerName ?: '—'}"></td>
+                        <td th:text="${a.start ?: '—'}"></td>
+                        <td th:text="${a.minutesDuration != null ? a.minutesDuration + ' min' : '—'}"></td>
+                        <td th:text="${a.serviceType ?: '—'}"></td>
+                        <td><span th:class="'badge status-' + (a.status ?: 'proposed')" th:text="${a.status ?: 'proposed'}"></span></td>
+                        <td>
+                            <div class="action-btns">
+                                <a th:if="${a.patientId != null}"
+                                   th:href="@{/encounters/patient/__${a.patientId}__/new(appointmentId=${a.id})}"
+                                   class="btn-encounter" title="Open clinical encounter">
+                                    <i class="fas fa-stethoscope"></i> Start Encounter
+                                </a>
+                                <a th:if="${a.patientId != null}"
+                                   th:href="@{/conditions/patient/__${a.patientId}__}"
+                                   class="btn-condition" title="Patient diagnoses">
+                                    <i class="fas fa-notes-medical"></i> Diagnoses
+                                </a>
+                                <a th:if="${a.patientId != null}"
+                                   th:href="@{/prescriptions/patient/__${a.patientId}__}"
+                                   class="btn-rx" title="Patient prescriptions">
+                                    <i class="fas fa-pills"></i> Prescriptions
+                                </a>
+                                <a th:href="@{/appointments/edit/{id}(id=${a.id})}" class="btn-edit"><i class="fas fa-edit"></i></a>
+                                <a th:href="@{/appointments/delete/{id}(id=${a.id})}" class="btn-danger" onclick="return confirm('Delete this appointment?')"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(appointments)}">
+                        <td colspan="7" class="td-empty">
+                            <i class="fas fa-calendar-times" style="font-size:36px;display:block;margin-bottom:12px;color:#d1d5db;"></i>
+                            No appointments yet. <a th:href="@{/appointments/new}" style="color:#00897b;font-weight:700;">Schedule one &rarr;</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

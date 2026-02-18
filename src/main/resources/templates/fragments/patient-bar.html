@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+
+<!--
+  1A — PATIENT IDENTITY BAR
+  Usage: <div th:replace="~{fragments/patient-bar :: bar(${patient}, 'Prescriptions')}"></div>
+  Parameters: patient (PatientDTO), pageTitle (string for <title> and breadcrumb)
+-->
+<div th:fragment="bar(patient, pageTitle)" style="margin-bottom: 12px;">
+
+    <!-- Browser <title> — "Patient Name · Page · MediCare ERP" -->
+    <th:block th:if="${patient != null}">
+        <script th:inline="javascript">
+            document.title = /*[[${patient.fullName}]]*/ 'Patient'
+                + ' · ' + /*[[${pageTitle}]]*/ 'Chart'
+                + ' · MediCare ERP';
+        </script>
+    </th:block>
+
+    <!-- 1B: Breadcrumb -->
+    <nav class="breadcrumb-bar" aria-label="breadcrumb">
+        <a th:href="@{/}"><i class="fas fa-th-large"></i> Dashboard</a>
+        <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+        <a th:href="@{/patients}">Patients</a>
+        <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+        <a th:href="@{/patients/{id}(id=${patient.id})}" th:text="${patient.fullName}">Patient Name</a>
+        <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+        <span class="breadcrumb-current" th:text="${pageTitle}">Page</span>
+    </nav>
+
+    <!-- 1A: Sticky Patient Identity Bar -->
+    <div th:class="'patient-identity-bar '
+                   + (${patient.gender != null && patient.gender.toLowerCase() == 'male'}   ? 'gender-male'
+                   : (${patient.gender != null && patient.gender.toLowerCase() == 'female'} ? 'gender-female'
+                   : 'gender-other'))"
+         role="banner"
+         aria-label="Current patient">
+
+        <div class="patient-identity-left">
+            <!-- Avatar -->
+            <div class="patient-avatar-circle">
+                <i th:class="${patient.gender != null && patient.gender.toLowerCase() == 'female'}
+                              ? 'fas fa-user' : 'fas fa-user'"></i>
+            </div>
+
+            <div>
+                <!-- Name — very large, unmissable -->
+                <div class="patient-identity-name" th:text="${patient.fullName}">Patient Name</div>
+
+                <!-- MRN chip with copy-to-clipboard -->
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:4px;">
+                    <span class="patient-mrn-chip"
+                          th:data-mrn="${patient.mrn}"
+                          onclick="copyMRN(this.getAttribute('data-mrn'))"
+                          th:title="'MRN: ' + ${patient.mrn} + ' — Click to copy'">
+                        <i class="fas fa-id-card"></i>
+                        <span>MRN: </span><span th:text="${patient.mrn ?: '—'}">MRN</span>
+                        <i class="fas fa-copy" style="font-size:11px;color:#9ca3af;margin-left:2px;"></i>
+                    </span>
+                    <span th:if="${patient.active}"
+                          style="background:#dcfce7;color:#166534;border:1.5px solid #86efac;border-radius:20px;padding:3px 11px;font-size:13px;font-weight:800;">
+                        <i class="fas fa-circle" style="font-size:8px;"></i> ACTIVE
+                    </span>
+                    <span th:unless="${patient.active}"
+                          style="background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;border-radius:20px;padding:3px 11px;font-size:13px;font-weight:800;">
+                        <i class="fas fa-circle" style="font-size:8px;"></i> INACTIVE
+                    </span>
+                </div>
+
+                <!-- Meta chips -->
+                <div class="patient-identity-meta">
+                    <span class="meta-chip" th:if="${patient.birthDate != null}">
+                        <i class="fas fa-birthday-cake"></i>
+                        <span th:text="${patient.birthDate}"></span>
+                    </span>
+                    <span class="meta-chip" th:if="${patient.gender != null}">
+                        <i class="fas fa-venus-mars"></i>
+                        <span th:text="${patient.gender}"></span>
+                    </span>
+                    <span class="blood-group-chip" th:if="${patient.bloodGroup != null}"
+                          th:text="${patient.bloodGroup}"></span>
+                    <span class="meta-chip" th:if="${patient.phone != null}">
+                        <i class="fas fa-phone"></i>
+                        <span th:text="${patient.phone}"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right actions -->
+        <div class="patient-identity-right">
+            <a th:href="@{/appointments/new(patientId=${patient.id})}"
+               class="btn-icon" title="Schedule appointment">
+                <i class="fas fa-calendar-plus"></i>
+            </a>
+            <a th:href="@{/patients/edit/{id}(id=${patient.id})}"
+               class="btn-icon" title="Edit patient">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a th:href="@{/patients/{id}(id=${patient.id})}"
+               class="back-to-patient-btn" title="Back to patient overview">
+                <i class="fas fa-arrow-left"></i> Patient Chart
+            </a>
+        </div>
+    </div>
+
+    <!-- MRN copy toast -->
+    <div class="mrn-copied-toast" id="mrnToast">
+        <i class="fas fa-check-circle"></i> MRN copied to clipboard
+    </div>
+
+    <script>
+    function copyMRN(mrn) {
+        if (!mrn || mrn === '—') return;
+        navigator.clipboard.writeText(mrn).then(function() {
+            var toast = document.getElementById('mrnToast');
+            toast.classList.add('show');
+            setTimeout(function() { toast.classList.remove('show'); }, 2000);
+        });
+    }
+    </script>
+
+</div>
+
+</body>
+</html>

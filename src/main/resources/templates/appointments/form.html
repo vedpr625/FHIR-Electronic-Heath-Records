@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"/><title>Schedule Appointment - MediCare ERP</title>
+<link rel="stylesheet" th:href="@{/css/style.css}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/></head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('appointments')}"></div>
+<nav class="sub-nav">
+    <div class="sub-nav-container">
+        <ul class="sub-nav-tabs">
+            <li class="sub-nav-item"><a th:href="@{/appointments}" class="sub-nav-link">All Appointments</a></li>
+            <li class="sub-nav-item active"><a href="#" class="sub-nav-link">Schedule New</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section"><div class="section-title">APPOINTMENTS</div>
+        <ul class="sidebar-menu">
+            <li class="menu-item"><a th:href="@{/appointments}" class="menu-link"><i class="fas fa-calendar-check" style="color:#1e88e5"></i><span>All Appointments</span></a></li>
+            <li class="menu-item"><a th:href="@{/appointments/new}" class="menu-link active"><i class="fas fa-calendar-plus" style="color:#1e88e5"></i><span>Schedule New</span></a></li>
+        </ul></div>
+    </aside>
+    <main class="content-area">
+        <div class="compact-form-container">
+            <div class="compact-form-header">
+                <div class="compact-header-left"><i class="fas fa-calendar-plus"></i><span th:text="${appointment.id != null && !appointment.id.isEmpty()} ? 'Edit Appointment' : 'Schedule Appointment'"></span></div>
+                <a th:href="@{/appointments}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+            <form th:action="@{/appointments/save}" th:object="${appointment}" method="post" class="compact-form">
+                <input type="hidden" th:field="*{id}"/>
+                <div class="compact-section">
+                    <div class="compact-section-title">Appointment Details</div>
+                    <div class="compact-grid">
+                        <div class="compact-field">
+                            <label class="compact-label required">Patient</label>
+                            <select th:field="*{patientId}" required class="compact-select">
+                                <option value="">-- Select Patient --</option>
+                                <option th:each="p : ${patients}" th:value="${p.id}" th:text="${p.fullName}" th:selected="${p.id == appointment.patientId or p.id == selectedPatientId}"></option>
+                            </select>
+                        </div>
+                        <div class="compact-field">
+                            <label class="compact-label required">Practitioner</label>
+                            <select th:field="*{practitionerId}" required class="compact-select">
+                                <option value="">-- Select Practitioner --</option>
+                                <option th:each="pr : ${practitioners}" th:value="${pr.id}" th:text="${'Dr. ' + pr.fullName}" th:selected="${pr.id == appointment.practitionerId}"></option>
+                            </select>
+                        </div>
+                        <div class="compact-field"><label class="compact-label required">Start Date &amp; Time</label><input type="datetime-local" th:field="*{start}" required class="compact-input"/></div>
+                        <div class="compact-field"><label class="compact-label">End Date &amp; Time</label><input type="datetime-local" th:field="*{end}" class="compact-input"/></div>
+                        <div class="compact-field"><label class="compact-label">Duration (minutes)</label><input type="number" th:field="*{minutesDuration}" class="compact-input" min="5" max="480" placeholder="e.g., 30"/></div>
+                        <div class="compact-field">
+                            <label class="compact-label">Status</label>
+                            <select th:field="*{status}" class="compact-select">
+                                <option value="proposed">Proposed</option>
+                                <option value="pending">Pending</option>
+                                <option value="booked">Booked</option>
+                                <option value="arrived">Arrived</option>
+                                <option value="fulfilled">Fulfilled</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="noshow">No Show</option>
+                            </select>
+                        </div>
+                        <div class="compact-field"><label class="compact-label">Service Type</label><input type="text" th:field="*{serviceType}" class="compact-input" placeholder="e.g., Consultation"/></div>
+                        <div class="compact-field" style="grid-column:1/-1"><label class="compact-label">Description / Notes</label><textarea th:field="*{description}" class="compact-input compact-textarea" rows="3" placeholder="Appointment notes..."></textarea></div>
+                    </div>
+                </div>
+                <div class="compact-form-actions">
+                    <button type="submit" class="btn-submit"><i class="fas fa-calendar-check"></i> Save Appointment</button>
+                    <a th:href="@{/appointments}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

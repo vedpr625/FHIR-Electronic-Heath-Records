@@ -1,0 +1,59 @@
+<!-- practitioners/list.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/><title>Practitioners - MediCare ERP</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: topnav('practitioners')}"></div>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="section-title">PRACTITIONERS</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/practitioners}" class="menu-link active"><i class="fas fa-user-md" style="color:#1e88e5"></i><span>All Practitioners</span></a></li>
+                <li class="menu-item"><a th:href="@{/practitioners/new}" class="menu-link"><i class="fas fa-user-plus" style="color:#1e88e5"></i><span>Add Practitioner</span></a></li>
+            </ul>
+        </div>
+        <div class="sidebar-section">
+            <div class="section-title">ORGANIZATIONS</div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a th:href="@{/organizations}" class="menu-link"><i class="fas fa-hospital" style="color:#8e24aa"></i><span>Organizations</span></a></li>
+            </ul>
+        </div>
+    </aside>
+    <main class="content-area">
+        <div class="flash-messages" style="padding-top:12px;">
+            <div th:if="${success}" class="alert alert-success"><i class="fas fa-check-circle"></i><span th:text="${success}"></span></div>
+            <div th:if="${error}" class="alert alert-error"><i class="fas fa-exclamation-circle"></i><span th:text="${error}"></span></div>
+        </div>
+        <div class="page-top">
+            <div class="page-header-bar">
+                <h1><i class="fas fa-user-md"></i> Practitioners</h1>
+                <a th:href="@{/practitioners/new}" class="btn-primary"><i class="fas fa-user-plus"></i> Add Practitioner</a>
+            </div>
+        </div>
+        <div class="table-card">
+            <table class="emr-table">
+                <thead><tr><th></th><th>Name</th><th>Specialization</th><th>License</th><th>Phone</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="p : ${practitioners}">
+                        <td><div class="patient-row-photo" th:text="${#strings.toUpperCase(#strings.substring(p.firstName ?: 'P', 0, 1)) + #strings.toUpperCase(#strings.substring(p.lastName ?: 'R', 0, 1))}"></div></td>
+                        <td style="font-weight:600;" th:text="${'Dr. ' + p.fullName}"></td>
+                        <td th:text="${p.specialization ?: '—'}"></td>
+                        <td><code th:text="${p.licenseNumber ?: '—'}"></code></td>
+                        <td th:text="${p.phone ?: '—'}"></td>
+                        <td th:text="${p.email ?: '—'}"></td>
+                        <td><span th:class="${p.active ? 'badge badge-active' : 'badge badge-inactive'}" th:text="${p.active ? 'Active' : 'Inactive'}"></span></td>
+                        <td><div class="action-btns"><a th:href="@{/practitioners/edit/{id}(id=${p.id})}" class="btn-edit"><i class="fas fa-edit"></i></a><a th:href="@{/practitioners/delete/{id}(id=${p.id})}" class="btn-danger" onclick="return confirm('Delete?')"><i class="fas fa-trash"></i></a></div></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(practitioners)}"><td colspan="8" class="td-empty">No practitioners found.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>
