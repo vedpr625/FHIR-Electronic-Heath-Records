@@ -2,6 +2,9 @@
 
 A Spring Boot-based Electronic Medical Records (EMR) system integrated with HL7 FHIR R4 standards.
 
+## 🚀 Live Demo
+[Click here to view the demo](https://demo.fhieremr.akhester.com/)
+
 ## Overview
 
 This application provides a comprehensive Electronic Medical Records system built with:
